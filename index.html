@@ -54,10 +54,10 @@
                         <span class="num">02</span> EXCELENCIA
                     </button>
                     <button class="mag-btn" onclick="showAppContent('cat3')">
-                        <span class="num">03</span> CLIENTES FELICES
+                        <span class="num">03</span> ASISTENTE RAPIDO Y DUDAS
                     </button>
                     <button class="mag-btn" onclick="showAppContent('cat4')">
-                        <span class="num">04</span> CONTACTO
+                        <span class="num">04</span> WHATSAPP Y REDES SOCIALES  
                     </button>
                 </div>
             </div>
@@ -73,7 +73,7 @@
             <!-- BLOQUE DE EVOLUCIÓN COMPLETAMENTE REUBICADO ABAJO DEL VIDEO -->
             <div class="mosaic-item custom-actions-block">
                 <button class="btn-custom-action btn-recommended-businesses" onclick="openBrandModal('modal-negocios')">
-                    VIVE CON NOSOTROS LA EVOLUCION
+                    VIDEOS / VIVE CON NOSOTROS LA EVOLUCION
                 </button>
             </div>
 
@@ -144,12 +144,46 @@
         <button class="btn-close-circular" onclick="closeAppContent()">×</button>
         <section class="tab-pane" id="cat1-pane" style="display: none;"><div id="grid-cat1" class="carousel-zigzag-grid"></div></section>
         <section class="tab-pane" id="cat2-pane" style="display: none;"><div id="grid-cat2" class="carousel-zigzag-grid"></div></section>
-        <section class="tab-pane" id="cat3-pane" style="display: none;"><div id="grid-cat3" class="carousel-zigzag-grid"></div></section>
-        <section class="tab-pane" id="cat4-pane" style="display: none;">
+        
+        <!-- APARTADO DE PREGUNTAS FRECUENTES (ADAPTADO A CONCESIONARIA DE AUTOS) -->
+        <section class="tab-pane" id="cat3-pane" style="display: none; padding: 20px; color: #fff; font-family: 'Montserrat', sans-serif;">
+            <h2 class="pane-title" style="text-align: center; margin-bottom: 25px; font-weight: bold; letter-spacing: 1.5px;">PREGUNTAS FRECUENTES</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px; max-width: 600px; margin: 0 auto;">
+                
+                <div style="background: rgba(255,255,255,0.08); padding: 15px; border-radius: 8px; border-left: 4px solid var(--brand-accent, #c5a059);">
+                    <h4 style="margin: 0 0 5px 0; font-size: 0.95rem; color: #fff; font-weight: 600;">¿Qué incluye la compra o renta de un vehículo?</h4>
+                    <p style="margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.8); line-height: 1.4;">Todos nuestros vehículos incluyen garantía de agencia, tanque lleno de cortesía, kit de seguridad vial y un detallado riguroso antes de la entrega.</p>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.08); padding: 15px; border-radius: 8px; border-left: 4px solid var(--brand-accent, #c5a059);">
+                    <h4 style="margin: 0 0 5px 0; font-size: 0.95rem; color: #fff; font-weight: 600;">¿Dónde se encuentran las instalaciones o el punto de entrega?</h4>
+                    <p style="margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.8); line-height: 1.4;">Nuestra sala de exhibición principal y área de entregas están ubicadas en el showroom principal. Las instrucciones detalladas se envían vía WhatsApp al agendar su cita.</p>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.08); padding: 15px; border-radius: 8px; border-left: 4px solid var(--brand-accent, #c5a059);">
+                    <h4 style="margin: 0 0 5px 0; font-size: 0.95rem; color: #fff; font-weight: 600;">¿Cuál es la política de cancelación o devolución de apartado?</h4>
+                    <p style="margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.8); line-height: 1.4;">Se aplican reembolsos completos en caso de cancelación del trámite crediticio o si se solicita la anulación al menos 48 horas antes de la firma del contrato.</p>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.08); padding: 15px; border-radius: 8px; border-left: 4px solid var(--brand-accent, #c5a059);">
+                    <h4 style="margin: 0 0 5px 0; font-size: 0.95rem; color: #fff; font-weight: 600;">¿Cómo puedo apartar o financiar un automóvil?</h4>
+                    <p style="margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.8); line-height: 1.4;">Puede asegurar su unidad con un depósito inicial mediante tarjeta o transferencia bancaria, y liquidar o iniciar su plan de financiamiento al momento de la entrega.</p>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.08); padding: 15px; border-radius: 8px; border-left: 4px solid var(--brand-accent, #c5a059);">
+                    <h4 style="margin: 0 0 5px 0; font-size: 0.95rem; color: #fff; font-weight: 600;">¿Ofrecen opciones de prueba de manejo (Test Drive)?</h4>
+                    <p style="margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.8); line-height: 1.4;">¡Por supuesto! Contamos con pruebas de manejo disponibles para todos nuestros modelos vigentes, con previa cita y licencia de conducir vigente.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="tab-pane" id="cat4-pane" style="display: none;"> ....
             <h2 class="pane-title">CONTACTO</h2>
             <div class="contact-panel-robust">
                 <p class="address-tag"><i class="fas fa-building"></i> ¡Síguenos en nuestras redes y canales oficiales!</p>
                 <div class="social-vertical-stack">
+                    <a id="link-whatsapp-direct" href="https://wa.me/5214491472336?text=Hi,%20I'm%20interested%20in%20booking%20a%20tour%20with%20Maya%20Blue%20Sailing." target="_blank" class="stack-btn" style="background-color: #25d366; color: #fff;"><i class="fab fa-whatsapp"></i> CHAT ON WHATSAPP</a>
                     <a id="link-web-chirey" href="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80" target="_blank" class="stack-btn fb-color" style="background-color: #002d62;"><i class="fas fa-globe"></i> SITIO WEB OFICIAL</a>
                     <a id="link-fb-chirey" href="https://www.facebook.com/?locale=es_LA" target="_blank" class="stack-btn fb-color"><i class="fab fa-facebook"></i> FACEBOOK OFICIAL</a>
                     <a id="link-ig-chirey" href="https://www.instagram.com/my_sing_studio/" target="_blank" class="stack-btn" style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #fff;"><i class="fab fa-instagram"></i> INSTAGRAM</a>
