@@ -697,16 +697,20 @@ async function compartirWhatsAppDirecto() {
         console.error("Error al registrar el punto:", e);
     }
 
-    // 3. Abrir el menú de compartir nativo del teléfono
-    const compartirData = {
-        title: 'ZENITH CAR - Tarjeta Digital',
-        text: '¡Excelente experiencia! Te la comparto:',
-        url: window.location.href 
-    };
-
-    try {
-        await navigator.share(compartirData);
-    } catch (err) {
-        console.log('El usuario canceló o el navegador no permitió abrir el menú:', err);
+    // 3. Abrir el menú completo de compartir del dispositivo (Redes sociales, WhatsApp, Correo, etc.)
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'ZENITH CAR - Tarjeta Digital',
+                text: '¡Excelente experiencia! Te la comparto:',
+                url: window.location.href 
+            });
+        } catch (err) {
+            console.log('El usuario canceló el menú de compartir');
+        }
+    } else {
+        // Plan de respaldo por si se abre desde una computadora de escritorio vieja que no tiene menú nativo
+        const mensaje = "¡Excelente experiencia! Te comparto la tarjeta digital: " + window.location.href;
+        window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje), '_blank');
     }
 }
