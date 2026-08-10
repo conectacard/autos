@@ -679,19 +679,13 @@ function toggleReseñaAcordeon(key) {
         panel.style.display = 'flex';
     }
 }
-function compartirWhatsAppDirecto() {
-    // 1. Detectar qué asesor está activo en la URL actual
+async function compartirWhatsAppDirecto() {
+    // 1. Detectar el asesor actual en la URL
     const urlParams = new URLSearchParams(window.location.search);
     let asesorActual = urlParams.get('asesor');
-    
-    let nombreAsesor = "Asesor 1"; 
-    if (asesorActual === '2') {
-        nombreAsesor = "Asesor 2";
-    } else if (asesorActual === '1') {
-        nombreAsesor = "Asesor 1";
-    }
+    let nombreAsesor = (asesorActual === '2') ? "Asesor 2" : "Asesor 1";
 
-    // 2. Sumar el punto automáticamente en la memoria del navegador para el panel del gerente
+    // 2. Registrar el punto en el panel del gerente de forma automática
     try {
         let actividadAsesores = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
         if (!actividadAsesores[nombreAsesor]) {
@@ -703,10 +697,16 @@ function compartirWhatsAppDirecto() {
         console.error("Error al registrar el punto:", e);
     }
 
-    // 3. Abrir WhatsApp directamente enviando el enlace exacto para que cargue la foto y la vista previa
-    const urlActual = window.location.href;
-    const mensaje = encodeURIComponent("Te comparto la tarjeta digital oficial:\n\n" + urlActual);
-    const enlaceWhatsApp = `https://api.whatsapp.com/send?text=${mensaje}`;
-    
-    window.open(enlaceWhatsApp, '_blank');
+    // 3. Abrir el menú de compartir nativo del teléfono
+    const compartirData = {
+        title: 'ZENITH CAR - Tarjeta Digital',
+        text: '¡Excelente experiencia! Te la comparto:',
+        url: window.location.href 
+    };
+
+    try {
+        await navigator.share(compartirData);
+    } catch (err) {
+        console.log('El usuario canceló o el navegador no permitió abrir el menú:', err);
+    }
 }
