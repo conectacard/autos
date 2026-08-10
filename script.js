@@ -679,3 +679,34 @@ function toggleReseñaAcordeon(key) {
         panel.style.display = 'flex';
     }
 }
+function compartirWhatsAppDirecto() {
+    // 1. Detectar qué asesor está activo en la URL actual
+    const urlParams = new URLSearchParams(window.location.search);
+    let asesorActual = urlParams.get('asesor');
+    
+    let nombreAsesor = "Asesor 1"; 
+    if (asesorActual === '2') {
+        nombreAsesor = "Asesor 2";
+    } else if (asesorActual === '1') {
+        nombreAsesor = "Asesor 1";
+    }
+
+    // 2. Sumar el punto automáticamente en la memoria del navegador para el panel del gerente
+    try {
+        let actividadAsesores = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
+        if (!actividadAsesores[nombreAsesor]) {
+            actividadAsesores[nombreAsesor] = { totalCompartidos: 0 };
+        }
+        actividadAsesores[nombreAsesor].totalCompartidos += 1;
+        localStorage.setItem('AUDITORIA_COMPARTIDOS_ASESORES', JSON.stringify(actividadAsesores));
+    } catch(e) {
+        console.error("Error al registrar el punto:", e);
+    }
+
+    // 3. Abrir WhatsApp directamente enviando el enlace exacto para que cargue la foto y la vista previa
+    const urlActual = window.location.href;
+    const mensaje = encodeURIComponent("Te comparto la tarjeta digital oficial:\n\n" + urlActual);
+    const enlaceWhatsApp = `https://api.whatsapp.com/send?text=${mensaje}`;
+    
+    window.open(enlaceWhatsApp, '_blank');
+}
