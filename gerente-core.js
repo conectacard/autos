@@ -126,10 +126,10 @@ function exportarAExcel() {
 }
 
 function limpiarPanelGerencial() {
-    if (confirm("¿Estás seguro de vaciar el panel de auditoría por completo?")) {
+    if (confirm("¿Estás seguro de vaciar el panel de auditoría por completo y reiniciar los contadores de asesores?")) {
         localStorage.removeItem('AUDITORIA_GERENCIAL_CARD');
         localStorage.removeItem('AUDITORIA_COMPARTIDOS_ASESORES');
-        alert("Panel vaciado correctamente.");
+        alert("Panel y contadores vaciados correctamente.");
         location.reload();
     }
 }
