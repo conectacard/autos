@@ -316,21 +316,54 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- 2. FUNCIÓN DE COMPARTIR ACTUALIZADA (CUENTA AL ASESOR SIN AFECTAR A NADIE MÁS) ---
+a// Variable para saber qué asesor está usando la tarjeta
+let asesorActivoParaEnviar = null;
+
+// Lee el enlace para detectar al asesor (ejemplo: ?asesor=4)
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const asesorId = urlParams.get('asesor');
+    if (asesorId) {
+        asesorActivoParaEnviar = `Asesor ${asesorId}`;
+        sessionStorage.setItem('asesor_activo_envio', asesorActivoParaEnviar);
+    } else {
+        asesorActivoParaEnviar = sessionStorage.getItem('asesor_activo_envio') || null;
+    }
+});
+
+// La función del botón de compartir que conecta todo con el gerente
 async function shareExperienceRobust() {
     try { 
         await navigator.share({ title: 'BMW Euromotors de Aguascalientes', url: window.location.href }); 
         if (asesorActivoParaEnviar) {
-            registrarEnvioAsesor(asesorActivoParaEnviar);
+            registrarEnvioAsesorExacto(asesorActivoParaEnviar);
         }
     }
     catch { 
-        playClick(); 
+        if (typeof playClick === 'function') playClick();
         navigator.clipboard.writeText(window.location.href).then(() => { 
             alert("¡Enlace de tarjeta copiado!"); 
             if (asesorActivoParaEnviar) {
-                registrarEnvioAsesor(asesorActivoParaEnviar);
+                registrarEnvioAsesorExacto(asesorActivoParaEnviar);
             }
         }); 
+    }
+}
+
+// La cajita donde se guarda el punto para que el gerente lo vea
+function registrarEnvioAsesorExacto(nombreAsesor) {
+    try {
+        const key = 'AUDITORIA_COMPARTIDOS_ASESORES';
+        let actividadAsesores = JSON.parse(localStorage.getItem(key)) || {};
+        
+        if (!actividadAsesores[nombreAsesor]) {
+            actividadAsesores[nombreAsesor] = { totalCompartidos: 0 };
+        }
+        
+        actividadAsesores[nombreAsesor].totalCompartidos = (actividadAsesores[nombreAsesor].totalCompartidos || 0) + 1;
+        localStorage.setItem(key, JSON.stringify(actividadAsesores));
+    } catch (e) {
+        console.error('Error al registrar el envío para el gerente', e);
     }
 }
 
