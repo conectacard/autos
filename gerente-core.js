@@ -26,6 +26,7 @@ function cerrarSesionGerente() {
 function cargarYProcesarAuditoria() {
     const registros = JSON.parse(localStorage.getItem('AUDITORIA_GERENCIAL_CARD')) || [];
     const tbody = document.getElementById('tabla-prospectos-body');
+    if (!tbody) return;
     tbody.innerHTML = ''; 
     
     let total = registros.length;
@@ -75,41 +76,41 @@ function cargarYProcesarAuditoria() {
     
     actualizarIndicadoresKPI(total, verdes, amarillos, rojos);
 
-    // --- NUEVO: CARGAR MÉTRICAS DE ACTIVIDAD/COMPARTIDOS DE ASESORES ---
+    // --- MÉTRICAS DE ACTIVIDAD DE ASESORES ---
     try {
         const actividadAsesores = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
         let contenedorMetricas = document.getElementById('panel-metricas-asesores');
         
-        // Si no existe un espacio en el HTML del gerente para esto, lo creamos dinámicamente arriba de la tabla
         if (!contenedorMetricas) {
             contenedorMetricas = document.createElement('div');
             contenedorMetricas.id = 'panel-metricas-asesores';
             contenedorMetricas.style.cssText = "margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-family: 'Montserrat', sans-serif;";
-            const tablaRef = document.getElementById('tabla-prospectos-body').closest('table');
+            const tablaRef = tbody.closest('table');
             if (tablaRef && tablaRef.parentNode) {
                 tablaRef.parentNode.insertBefore(contenedorMetricas, tablaRef);
             }
         }
 
-        let htmlMetricas = `<h4 style="margin-bottom: 10px; color: var(--brand-accent, #f80101); font-size: 0.9rem; text-transform: uppercase;"><i class="fas fa-chart-line"></i> Auditoría de Actividad: Veces que los asesores han compartido la CARD</h4>`;
+        let htmlMetricas = `<h4 style="margin-bottom: 10px; color: #f80101; font-size: 0.9rem; text-transform: uppercase;"><i class="fas fa-chart-line"></i> Auditoría de Actividad: Veces que los asesores han compartido la CARD</h4>`;
         htmlMetricas += `<div style="display: flex; flex-wrap: wrap; gap: 10px;">`;
         
-        ASESORES_AGENCIA.forEach(nombreAsesor => {
-            let datosAsesor = actividadAsesores[nombreAsesor] || { totalCompartidos: 0 };
-            htmlMetricas += `
-                <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); min-width: 150px; flex: 1;">
-                    <div style="font-size: 0.75rem; color: #aaa;">${nombreAsesor}</div>
-                    <div style="font-size: 1.2rem; font-weight: bold; color: #00f0ff; margin-top: 4px;">${datosAsesor.totalCompartidos} <span style="font-size: 0.7rem; color: #fff; font-weight: normal;">envíos</span></div>
-                </div>
-            `;
-        });
+        if (typeof ASESORES_AGENCIA !== 'undefined') {
+            ASESORES_AGENCIA.forEach(nombreAsesor => {
+                let datosAsesor = actividadAsesores[nombreAsesor] || { totalCompartidos: 0 };
+                htmlMetricas += `
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); min-width: 150px; flex: 1;">
+                        <div style="font-size: 0.75rem; color: #aaa;">${nombreAsesor}</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: #00f0ff; margin-top: 4px;">${datosAsesor.totalCompartidos} <span style="font-size: 0.7rem; color: #fff; font-weight: normal;">envíos</span></div>
+                    </div>
+                `;
+            });
+        }
         htmlMetricas += `</div>`;
         contenedorMetricas.innerHTML = htmlMetricas;
     } catch(e) {
         console.error("Error al cargar métricas de asesores:", e);
     }
 }
-
 function actualizarIndicadoresKPI(t, v, a, r) {
     document.getElementById('kpi-total').innerText = t;
     document.getElementById('kpi-verde').innerText = v;

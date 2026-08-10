@@ -591,11 +591,15 @@ function finalizarCuestionarioYMostrarAsesores() {
 
 // --- FUNCIONES PARA EL NUEVO MENÚ INDEPENDIENTE DE RESEÑAS ---
 function abrirMenuReseñas() {
-    playClick();
+    if (typeof playClick === 'function') {
+        playClick();
+    }
     const menu = document.getElementById('miMenuReseñas');
-    if(menu) {
+    if (menu) {
         menu.style.display = 'flex';
-        inicializarAcordeonReseñas();
+        if (typeof inicializarAcordeonReseñas === 'function') {
+            inicializarAcordeonReseñas();
+        }
     }
 }
 
