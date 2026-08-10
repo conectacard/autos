@@ -74,7 +74,7 @@ function cargarYProcesarAuditoria() {
     
     actualizarIndicadoresKPI(total, verdes, amarillos, rojos);
 
-    // 2. Procesar y mostrar la actividad/compartidos de los asesores (Conectado con AUDITORIA_COMPARTIDOS_ASESORES)
+    // 2. Procesar y mostrar la actividad/compartidos de los asesores
     procesarAuditoriaAsesores();
 }
 
@@ -82,12 +82,21 @@ function procesarAuditoriaAsesores() {
     const actividadAsesores = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
     let contenedorAsesores = document.getElementById('panel-asesores-resumen');
     
-    // Si no existe un contenedor en tu HTML para mostrar los asesores, lo creamos dinámicamente o puedes asignarlo
+    // Si no existe el contenedor en tu HTML, lo creamos automáticamente para que siempre se muestre
     if (!contenedorAsesores) {
-        return; 
+        contenedorAsesores = document.createElement('div');
+        contenedorAsesores.id = 'panel-asesores-resumen';
+        contenedorAsesores.style.cssText = "margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;";
+        
+        const panelGerente = document.getElementById('panel-gerente');
+        if (panelGerente) {
+            panelGerente.appendChild(contenedorAsesores);
+        } else {
+            document.body.appendChild(contenedorAsesores);
+        }
     }
 
-    let htmlAsesores = '<h3 style="color:#fff; margin-top:20px;">Desglose de Envíos por Asesor</h3><ul style="color:#ccc; list-style:none; padding:0;">';
+    let htmlAsesores = '<h3 style="color:#fff; margin-top:10px;">Desglose de Envíos por Asesor</h3><ul style="color:#ccc; list-style:none; padding:0;">';
     
     ASESORES_AGENCIA.forEach(asesorNombre => {
         let datosAsesor = actividadAsesores[asesorNombre] || { totalCompartidos: 0 };
