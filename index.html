@@ -83,6 +83,55 @@
                 </button>
             </div>
 
+            <!-- NUEVO BOTÓN INDEPENDIENTE: VALORA LA ATENCIÓN -->
+            <div class="mosaic-item lead-block" style="margin-top: 8px;">
+                <button type="button" onclick="abrirMenuReseñas()" class="btn-shiny-gold shine-effect" style="background: linear-gradient(135deg, #f80101 0%, #b30000 100%); color: #fff;">
+                    <i class="fas fa-star" style="margin-right: 8px;"></i> ⭐ VALORA LA ATENCIÓN DE TU ASESOR
+                </button>
+            </div>
+
+            <!-- MENÚ DE CONTACTO - SE GENERA DINÁMICAMENTE POR SCRIPT -->
+            <div id="miMenuContacto" class="menu-oculto" onclick="cerrarMenu()">
+                <div class="menu-contenido" onclick="event.stopPropagation()">
+                    <div class="bloque-mapa-guia" style="text-align: center; padding: 5px 0 15px 0; width: 100%;">
+                        <h3 style="font-size: 0.95rem; font-weight: bold; color: #fff; text-transform: uppercase; margin-bottom: 4px; font-family: 'Montserrat', sans-serif;">Contacta a tu Asesor Digital</h3>
+                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.7); margin-bottom: 12px; font-family: 'Montserrat', sans-serif; padding: 0 10px;">Elige al asesor de tu preferencia para recibir atención inmediata / Da clic a su nombre.</p>
+                        
+                        <!-- CÓMO LLEGAR DIRECTO -->
+                        <a id="boton-como-llegar-principal" 
+                           href="https://maps.app.goo.gl/DhjuGyGnGQF74pzT9" 
+                           target="_blank" 
+                           class="btn-menu maps-btn" 
+                           style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; font-weight: bold; background-color: #f80101; color: white; border-radius: 8px; text-decoration: none; font-family: 'Montserrat', sans-serif; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid var(--brand-accent);"
+                           onclick="playClick()">
+                           <i class="fas fa-location-arrow"></i> CÓMO LLEGAR 
+                        </a>
+                    </div>
+
+                    <!-- Contenedor inyectado por JS -->
+                    <div id="contenedor-sucursales"></div>
+                    
+                    <!-- BOTÓN DE CIERRE FIJO -->
+                    <button onclick="cerrarMenu()" class="btn-cerrar">Cerrar</button>
+                </div>
+            </div>
+
+            <!-- NUEVO MENÚ OCULTO PARA RESEÑAS / FEEDBACK CONFIDENCIAL -->
+            <div id="miMenuReseñas" class="menu-oculto" onclick="cerrarMenuReseñas()">
+                <div class="menu-contenido" onclick="event.stopPropagation()">
+                    <div class="bloque-mapa-guia" style="text-align: center; padding: 5px 0 15px 0; width: 100%;">
+                        <h3 style="font-size: 0.95rem; font-weight: bold; color: #fff; text-transform: uppercase; margin-bottom: 4px; font-family: 'Montserrat', sans-serif;">Evaluación de Servicio (Confidencial)</h3>
+                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.7); margin-bottom: 12px; font-family: 'Montserrat', sans-serif; padding: 0 10px;">Elige a tu asesor para enviar tu calificación directamente a la Gerencia de Ventas.</p>
+                    </div>
+
+                    <!-- Contenedor inyectado por JS para las reseñas -->
+                    <div id="contenedor-reseñas-asesores" style="width: 100%; display: flex; flex-direction: column; gap: 8px;"></div>
+                    
+                    <!-- BOTÓN DE CIERRE FIJO -->
+                    <button onclick="cerrarMenuReseñas()" class="btn-cerrar" style="margin-top: 15px;">Cerrar</button>
+                </div>
+            </div>
+
             <!-- MENÚ DE CONTACTO - SE GENERA DINÁMICAMENTE POR SCRIPT -->
             <div id="miMenuContacto" class="menu-oculto" onclick="cerrarMenu()">
                 <div class="menu-contenido" onclick="event.stopPropagation()">

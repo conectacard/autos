@@ -1,13 +1,42 @@
-// --- CONFIGURACIÓN DE PAGO DE LA PYME ---
-const USA_STRIPE = false;
-const STRIPE_PUBLIC_KEY = ""; 
-const DATOS_BANCARIOS = {
-    banco: "",
-    clabe: "",
-    titular: "Nombre del Titular"
-};
-// ----------------------------------------
+// --- DETECCIÓN AUTOMÁTICA DEL ASESOR ---
+(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const asesorParam = urlParams.get('asesor');
+    if (asesorParam) {
+        localStorage.setItem('ASESOR_ACTIVO_CARD', `Asesor ${asesorParam}`);
+    } else if (!localStorage.getItem('ASESOR_ACTIVO_CARD')) {
+        localStorage.setItem('ASESOR_ACTIVO_CARD', 'Público / General');
+    }
+})();
 
+// --- FUNCIÓN DE COMPARTIR CON AUDITORÍA INTELIGENTE ---
+async function shareExperienceRobust() {
+    try {
+        let registroActividad = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
+        let asesorActual = localStorage.getItem('ASESOR_ACTIVO_CARD') || 'Público / General';
+        
+        if (!registroActividad[asesorActual]) {
+            registroActividad[asesorActual] = { totalCompartidos: 0, ultimosEnvios: [] };
+        }
+        
+        registroActividad[asesorActual].totalCompartidos += 1;
+        registroActividad[asesorActual].ultimosEnvios.push(new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
+        
+        localStorage.setItem('AUDITORIA_COMPARTIDOS_ASESORES', JSON.stringify(registroActividad));
+    } catch (e) {
+        // Fallo silencioso de respaldo
+    }
+
+    try { 
+        await navigator.share({ title: 'ZENITH CAR - Tarjeta Digital', url: window.location.href }); 
+    }
+    catch { 
+        playClick(); 
+        navigator.clipboard.writeText(window.location.href).then(() => { 
+            alert("¡Enlace de tarjeta copiado!"); 
+        }); 
+    }
+}
 const CONFIG = {
     whatsapp: "5214491472336", 
     whatsappAdicional: "5214491472336",
@@ -292,8 +321,34 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function shareExperienceRobust() {
-    try { await navigator.share({ title: 'BMW Euromotors de Aguascalientes', url: window.location.href }); }
-    catch { playClick(); navigator.clipboard.writeText(window.location.href).then(() => { alert("¡Enlace de tarjeta copiado!"); }); }
+    // ---- NUEVO: REGISTRO INVISIBLE DE AUDITORÍA DE COMPARTIDOS ----
+    try {
+        let registroActividad = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
+        // Detectamos si hay un asesor activo en la sesión (por defecto Asesor 1 si no hay otro)
+        let asesorActual = localStorage.getItem('ASESOR_ACTIVO_CARD') || 'Asesor 1';
+        
+        if (!registroActividad[asesorActual]) {
+            registroActividad[asesorActual] = { totalCompartidos: 0, ultimosEnvios: [] };
+        }
+        
+        registroActividad[asesorActual].totalCompartidos += 1;
+        registroActividad[asesorActual].ultimosEnvios.push(new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
+        
+        localStorage.setItem('AUDITORIA_COMPARTIDOS_ASESORES', JSON.stringify(registroActividad));
+    } catch (e) {
+        // Si ocurre algún fallo silencioso, la tarjeta sigue funcionando con normalidad absoluta
+    }
+    // -----------------------------------------------------------------
+
+    try { 
+        await navigator.share({ title: 'ZENITH CAR - Tarjeta Digital', url: window.location.href }); 
+    }
+    catch { 
+        playClick(); 
+        navigator.clipboard.writeText(window.location.href).then(() => { 
+            alert("¡Enlace de tarjeta copiado!"); 
+        }); 
+    }
 }
 /* ==========================================================================
    MÓDULO DE CUESTIONARIO INTELIGENTE (POTENCIA EXTERNA + CONTROL INTERNO)
@@ -531,5 +586,92 @@ function finalizarCuestionarioYMostrarAsesores() {
         abrirMenu();
     } else {
         console.log("No se encontró la función abrirMenu");
+    }
+}
+
+// --- FUNCIONES PARA EL NUEVO MENÚ INDEPENDIENTE DE RESEÑAS ---
+function abrirMenuReseñas() {
+    playClick();
+    const menu = document.getElementById('miMenuReseñas');
+    if(menu) {
+        menu.style.display = 'flex';
+        inicializarAcordeonReseñas();
+    }
+}
+
+function cerrarMenuReseñas() {
+    playClick();
+    const menu = document.getElementById('miMenuReseñas');
+    if(menu) {
+        menu.style.display = 'none';
+    }
+}
+
+function inicializarAcordeonReseñas() {
+    const contenedor = document.getElementById('contenedor-reseñas-asesores');
+    if(!contenedor) return;
+    contenedor.innerHTML = '';
+
+    Object.keys(CONFIG.sucursales).forEach((key, index) => {
+        const suc = CONFIG.sucursales[key];
+        const numAsesor = index + 1;
+        const imgAsesor = `assets/brand/ASESOR${numAsesor}.jpg`;
+        
+        const btn = document.createElement('button');
+        btn.className = 'sucursal-accordion-btn';
+        
+        const wrapImg = document.createElement('div');
+        wrapImg.className = 'wrapper-miniatura-asesor';
+        wrapImg.innerHTML = `<img src="${imgAsesor}" alt="Asesor ${numAsesor}" class="img-miniatura-asesor" onerror="this.src='assets/brand/logo-mini.png'">`;
+        wrapImg.onclick = (e) => {
+            e.stopPropagation();
+            playClick();
+            openLightbox(imgAsesor, [imgAsesor], true);
+        };
+        
+        const txtLabel = document.createElement('div');
+        txtLabel.className = 'texto-accordion-asesor';
+        txtLabel.innerText = `${numAsesor}. ASESOR ${numAsesor}`;
+        
+        const arrowIcon = document.createElement('i');
+        arrowIcon.className = 'fas fa-chevron-down icono-accordion-flecha';
+        
+        btn.appendChild(wrapImg);
+        btn.appendChild(txtLabel);
+        btn.appendChild(arrowIcon);
+        
+        btn.onclick = () => toggleReseñaAcordeon(key);
+        
+        const panel = document.createElement('div');
+        panel.id = `resena-${key}-panel`;
+        panel.className = 'sucursal-panel-content';
+        
+        const mensajePrivado = encodeURIComponent(`Hola Gerencia, deseo calificar la atención del ASESOR ${numAsesor}. Mi calificación es de [1 al 5] estrellas y mis comentarios son: `);
+        const waGerenciaUrl = `https://wa.me/524491472336?text=${mensajePrivado}`;
+
+        panel.innerHTML = `
+            <div class="sucursal-info-block" style="text-align: center;">
+                <p class="suc-domicilio" style="font-weight: 700; color: #fff; font-size: 0.8rem;"><i class="fas fa-shield-alt" style="color: var(--brand-accent); margin-right: 4px;"></i> Evaluación Confidencial</p>
+                <p class="suc-horario" style="font-size: 0.7rem; margin-top: 4px; color: rgba(255,255,255,0.8);">Tu asesor no verá esta calificación; va directa a la Gerencia de Ventas.</p>
+                <div class="marca-elegante-asesor">ZENITH CAR</div>
+            </div>
+            <a href="${waGerenciaUrl}" target="_blank" class="btn-menu" style="background:#f80101; color:#fff; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border-radius:8px; font-weight:bold; margin-top:8px;"><i class="fas fa-star"></i> ⭐ Enviar Calificación (WhatsApp Gerencia)</a>
+        `;
+        
+        contenedor.appendChild(btn);
+        contenedor.appendChild(panel);
+    });
+}
+
+function toggleReseñaAcordeon(key) {
+    playClick();
+    const panel = document.getElementById(`resena-${key}-panel`);
+    if(!panel) return;
+    const estaVisible = panel.style.display === 'flex';
+    
+    document.querySelectorAll('#contenedor-reseñas-asesores .sucursal-panel-content').forEach(p => p.style.display = 'none');
+    
+    if (!estaVisible) {
+        panel.style.display = 'flex';
     }
 }
