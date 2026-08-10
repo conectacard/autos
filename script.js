@@ -679,37 +679,38 @@ function toggleReseñaAcordeon(key) {
         panel.style.display = 'flex';
     }
 }
-async function compartirWhatsAppDirecto() {
-    // 1. Detectar el asesor actual en la URL
+function compartirRedesSociales() {
+    // 1. Detectar si la URL realmente pertenece a un asesor (tiene ?asesor=1 o ?asesor=2)
     const urlParams = new URLSearchParams(window.location.search);
     let asesorActual = urlParams.get('asesor');
-    let nombreAsesor = (asesorActual === '2') ? "Asesor 2" : "Asesor 1";
 
-    // 2. Registrar el punto en el panel del gerente de forma automática
-    try {
-        let actividadAsesores = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
-        if (!actividadAsesores[nombreAsesor]) {
-            actividadAsesores[nombreAsesor] = { totalCompartidos: 0 };
+    // 2. SOLO registrar el punto si hay un asesor válido en el enlace. 
+    // Si la abrió un vecino o un cliente sin enlace de asesor, esto se omite por completo.
+    if (asesorActual === '1' || asesorActual === '2') {
+        let nombreAsesor = "Asesor " + asesorActual;
+        try {
+            let actividadAsesores = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
+            if (!actividadAsesores[nombreAsesor]) {
+                actividadAsesores[nombreAsesor] = { totalCompartidos: 0 };
+            }
+            actividadAsesores[nombreAsesor].totalCompartidos += 1;
+            localStorage.setItem('AUDITORIA_COMPARTIDOS_ASESORES', JSON.stringify(actividadAsesores));
+        } catch(e) {
+            console.error("Error al registrar el punto:", e);
         }
-        actividadAsesores[nombreAsesor].totalCompartidos += 1;
-        localStorage.setItem('AUDITORIA_COMPARTIDOS_ASESORES', JSON.stringify(actividadAsesores));
-    } catch(e) {
-        console.error("Error al registrar el punto:", e);
     }
 
-    // 3. Abrir el menú completo de compartir del dispositivo (Redes sociales, WhatsApp, Correo, etc.)
+    // 3. Abrir el menú de redes sociales para cualquier persona que le dé clic al botón
     if (navigator.share) {
-        try {
-            await navigator.share({
-                title: 'ZENITH CAR - Tarjeta Digital',
-                text: '¡Excelente experiencia! Te la comparto:',
-                url: window.location.href 
-            });
-        } catch (err) {
-            console.log('El usuario canceló el menú de compartir');
-        }
+        navigator.share({
+            title: 'ZENITH CAR - Tarjeta Digital',
+            text: '¡Excelente experiencia! Te la comparto:',
+            url: window.location.href 
+        }).catch(err => {
+            console.log('El usuario canceló el menú', err);
+        });
     } else {
-        // Plan de respaldo por si se abre desde una computadora de escritorio vieja que no tiene menú nativo
+        // Respaldo para computadoras de escritorio
         const mensaje = "¡Excelente experiencia! Te comparto la tarjeta digital: " + window.location.href;
         window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje), '_blank');
     }
