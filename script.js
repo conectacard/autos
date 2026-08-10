@@ -1,42 +1,13 @@
-// --- DETECCIÓN AUTOMÁTICA DEL ASESOR ---
-(function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const asesorParam = urlParams.get('asesor');
-    if (asesorParam) {
-        localStorage.setItem('ASESOR_ACTIVO_CARD', `Asesor ${asesorParam}`);
-    } else if (!localStorage.getItem('ASESOR_ACTIVO_CARD')) {
-        localStorage.setItem('ASESOR_ACTIVO_CARD', 'Público / General');
-    }
-})();
+// --- CONFIGURACIÓN DE PAGO DE LA PYME ---
+const USA_STRIPE = false;
+const STRIPE_PUBLIC_KEY = ""; 
+const DATOS_BANCARIOS = {
+    banco: "",
+    clabe: "",
+    titular: "Nombre del Titular"
+};
+// ----------------------------------------
 
-// --- FUNCIÓN DE COMPARTIR CON AUDITORÍA INTELIGENTE ---
-async function shareExperienceRobust() {
-    try {
-        let registroActividad = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
-        let asesorActual = localStorage.getItem('ASESOR_ACTIVO_CARD') || 'Público / General';
-        
-        if (!registroActividad[asesorActual]) {
-            registroActividad[asesorActual] = { totalCompartidos: 0, ultimosEnvios: [] };
-        }
-        
-        registroActividad[asesorActual].totalCompartidos += 1;
-        registroActividad[asesorActual].ultimosEnvios.push(new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
-        
-        localStorage.setItem('AUDITORIA_COMPARTIDOS_ASESORES', JSON.stringify(registroActividad));
-    } catch (e) {
-        // Fallo silencioso de respaldo
-    }
-
-    try { 
-        await navigator.share({ title: 'ZENITH CAR - Tarjeta Digital', url: window.location.href }); 
-    }
-    catch { 
-        playClick(); 
-        navigator.clipboard.writeText(window.location.href).then(() => { 
-            alert("¡Enlace de tarjeta copiado!"); 
-        }); 
-    }
-}
 const CONFIG = {
     whatsapp: "5214491472336", 
     whatsappAdicional: "5214491472336",
@@ -321,34 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function shareExperienceRobust() {
-    // ---- NUEVO: REGISTRO INVISIBLE DE AUDITORÍA DE COMPARTIDOS ----
-    try {
-        let registroActividad = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
-        // Detectamos si hay un asesor activo en la sesión (por defecto Asesor 1 si no hay otro)
-        let asesorActual = localStorage.getItem('ASESOR_ACTIVO_CARD') || 'Asesor 1';
-        
-        if (!registroActividad[asesorActual]) {
-            registroActividad[asesorActual] = { totalCompartidos: 0, ultimosEnvios: [] };
-        }
-        
-        registroActividad[asesorActual].totalCompartidos += 1;
-        registroActividad[asesorActual].ultimosEnvios.push(new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
-        
-        localStorage.setItem('AUDITORIA_COMPARTIDOS_ASESORES', JSON.stringify(registroActividad));
-    } catch (e) {
-        // Si ocurre algún fallo silencioso, la tarjeta sigue funcionando con normalidad absoluta
-    }
-    // -----------------------------------------------------------------
-
-    try { 
-        await navigator.share({ title: 'ZENITH CAR - Tarjeta Digital', url: window.location.href }); 
-    }
-    catch { 
-        playClick(); 
-        navigator.clipboard.writeText(window.location.href).then(() => { 
-            alert("¡Enlace de tarjeta copiado!"); 
-        }); 
-    }
+    try { await navigator.share({ title: 'BMW Euromotors de Aguascalientes', url: window.location.href }); }
+    catch { playClick(); navigator.clipboard.writeText(window.location.href).then(() => { alert("¡Enlace de tarjeta copiado!"); }); }
 }
 /* ==========================================================================
    MÓDULO DE CUESTIONARIO INTELIGENTE (POTENCIA EXTERNA + CONTROL INTERNO)
@@ -591,15 +536,11 @@ function finalizarCuestionarioYMostrarAsesores() {
 
 // --- FUNCIONES PARA EL NUEVO MENÚ INDEPENDIENTE DE RESEÑAS ---
 function abrirMenuReseñas() {
-    if (typeof playClick === 'function') {
-        playClick();
-    }
+    playClick();
     const menu = document.getElementById('miMenuReseñas');
-    if (menu) {
+    if(menu) {
         menu.style.display = 'flex';
-        if (typeof inicializarAcordeonReseñas === 'function') {
-            inicializarAcordeonReseñas();
-        }
+        inicializarAcordeonReseñas();
     }
 }
 
@@ -677,41 +618,5 @@ function toggleReseñaAcordeon(key) {
     
     if (!estaVisible) {
         panel.style.display = 'flex';
-    }
-}
-function compartirRedesSociales() {
-    // 1. Detectar si la URL realmente pertenece a un asesor (tiene ?asesor=1 o ?asesor=2)
-    const urlParams = new URLSearchParams(window.location.search);
-    let asesorActual = urlParams.get('asesor');
-
-    // 2. SOLO registrar el punto si hay un asesor válido en el enlace. 
-    // Si la abrió un vecino o un cliente sin enlace de asesor, esto se omite por completo.
-    if (asesorActual === '1' || asesorActual === '2') {
-        let nombreAsesor = "Asesor " + asesorActual;
-        try {
-            let actividadAsesores = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
-            if (!actividadAsesores[nombreAsesor]) {
-                actividadAsesores[nombreAsesor] = { totalCompartidos: 0 };
-            }
-            actividadAsesores[nombreAsesor].totalCompartidos += 1;
-            localStorage.setItem('AUDITORIA_COMPARTIDOS_ASESORES', JSON.stringify(actividadAsesores));
-        } catch(e) {
-            console.error("Error al registrar el punto:", e);
-        }
-    }
-
-    // 3. Abrir el menú de redes sociales para cualquier persona que le dé clic al botón
-    if (navigator.share) {
-        navigator.share({
-            title: 'ZENITH CAR - Tarjeta Digital',
-            text: '¡Excelente experiencia! Te la comparto:',
-            url: window.location.href 
-        }).catch(err => {
-            console.log('El usuario canceló el menú', err);
-        });
-    } else {
-        // Respaldo para computadoras de escritorio
-        const mensaje = "¡Excelente experiencia! Te comparto la tarjeta digital: " + window.location.href;
-        window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje), '_blank');
     }
 }
