@@ -1,22 +1,12 @@
-// --- REGISTRO AUTOMÁTICO DE VISITA POR ASESOR (URL ?asesor=X) ---
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const asesorId = urlParams.get('asesor');
-        
-        if (asesorId) {
-            const key = 'TRAIL_MAQ_AUDIT_ASESORES';
-            let datos = JSON.parse(localStorage.getItem(key)) || {};
-            
-            datos[asesorId] = (datos[asesorId] || 0) + 1;
-            datos['ultimo_acceso'] = new Date().toISOString();
-            
-            localStorage.setItem(key, JSON.stringify(datos));
-        }
-    } catch (e) {
-        console.error('Error al registrar la visita del asesor', e);
-    }
-});
+// --- CONFIGURACIÓN DE PAGO DE LA PYME ---
+const USA_STRIPE = false;
+const STRIPE_PUBLIC_KEY = ""; 
+const DATOS_BANCARIOS = {
+    banco: "",
+    clabe: "",
+    titular: "Nombre del Titular"
+};
+// ----------------------------------------
 
 const CONFIG = {
     whatsapp: "5214491472336", 
@@ -301,94 +291,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }, {once: true});
 });
 
-// --- 1. DETECTOR DE ASESOR PARA CONTAR ENVÍOS ---
-let asesorActivoParaEnviar = null;
-
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const asesorId = urlParams.get('asesor');
-    if (asesorId) {
-        asesorActivoParaEnviar = asesorId;
-        sessionStorage.setItem('asesor_activo_envio', asesorId);
-    } else {
-        asesorActivoParaEnviar = sessionStorage.getItem('asesor_activo_envio') || null;
-    }
-});
-
-// --- 2. FUNCIÓN DE COMPARTIR ACTUALIZADA (CUENTA AL ASESOR SIN AFECTAR A NADIE MÁS) ---
-a// Variable para saber qué asesor está usando la tarjeta
-let asesorActivoParaEnviar = null;
-
-// Lee el enlace para detectar al asesor (ejemplo: ?asesor=4)
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const asesorId = urlParams.get('asesor');
-    if (asesorId) {
-        asesorActivoParaEnviar = `Asesor ${asesorId}`;
-        sessionStorage.setItem('asesor_activo_envio', asesorActivoParaEnviar);
-    } else {
-        asesorActivoParaEnviar = sessionStorage.getItem('asesor_activo_envio') || null;
-    }
-});
-
-// La función del botón de compartir que conecta todo con el gerente
 async function shareExperienceRobust() {
-    try { 
-        await navigator.share({ title: 'BMW Euromotors de Aguascalientes', url: window.location.href }); 
-        if (asesorActivoParaEnviar) {
-            registrarEnvioAsesorExacto(asesorActivoParaEnviar);
-        }
-    }
-    catch { 
-        if (typeof playClick === 'function') playClick();
-        navigator.clipboard.writeText(window.location.href).then(() => { 
-            alert("¡Enlace de tarjeta copiado!"); 
-            if (asesorActivoParaEnviar) {
-                registrarEnvioAsesorExacto(asesorActivoParaEnviar);
-            }
-        }); 
-    }
+    try { await navigator.share({ title: 'BMW Euromotors de Aguascalientes', url: window.location.href }); }
+    catch { playClick(); navigator.clipboard.writeText(window.location.href).then(() => { alert("¡Enlace de tarjeta copiado!"); }); }
 }
-
-// La cajita donde se guarda el punto para que el gerente lo vea
-function registrarEnvioAsesorExacto(nombreAsesor) {
-    try {
-        const key = 'AUDITORIA_COMPARTIDOS_ASESORES';
-        let actividadAsesores = JSON.parse(localStorage.getItem(key)) || {};
-        
-        if (!actividadAsesores[nombreAsesor]) {
-            actividadAsesores[nombreAsesor] = { totalCompartidos: 0 };
-        }
-        
-        actividadAsesores[nombreAsesor].totalCompartidos = (actividadAsesores[nombreAsesor].totalCompartidos || 0) + 1;
-        localStorage.setItem(key, JSON.stringify(actividadAsesores));
-    } catch (e) {
-        console.error('Error al registrar el envío para el gerente', e);
-    }
-}
-
-// --- 3. REGISTRO INTERNO PARA EL PANEL DEL GERENTE ---
-function registrarEnvioAsesor(idAsesor) {
-    try {
-        const key = 'TRAIL_MAQ_AUDIT_ASESORES';
-        let datos = JSON.parse(localStorage.getItem(key)) || {};
-        
-        if (!datos[idAsesor]) {
-            datos[idAsesor] = { visitas: 0, envios: 0 };
-        } else if (typeof datos[idAsesor] === 'number') {
-            let visitasViejas = datos[idAsesor];
-            datos[idAsesor] = { visitas: visitasViejas, envios: 0 };
-        }
-        
-        datos[idAsesor].envios = (datos[idAsesor].envios || 0) + 1;
-        datos['ultimo_envio'] = new Date().toISOString();
-        
-        localStorage.setItem(key, JSON.stringify(datos));
-    } catch (e) {
-        console.error('Error al registrar el envío', e);
-    }
-}
-
 /* ==========================================================================
    MÓDULO DE CUESTIONARIO INTELIGENTE (POTENCIA EXTERNA + CONTROL INTERNO)
    ========================================================================== */

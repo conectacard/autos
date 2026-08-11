@@ -24,7 +24,6 @@ function cerrarSesionGerente() {
 }
 
 function cargarYProcesarAuditoria() {
-    // 1. Cargar prospectos
     const registros = JSON.parse(localStorage.getItem('AUDITORIA_GERENCIAL_CARD')) || [];
     const tbody = document.getElementById('tabla-prospectos-body');
     tbody.innerHTML = ''; 
@@ -34,77 +33,48 @@ function cargarYProcesarAuditoria() {
     
     if (total === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#555; padding: 20px;">No hay registros de prospectos todavía.</td></tr>`;
-    } else {
-        registros.forEach((prospecto) => {
-            let prioridad = prospecto.prioridad || "rojo";
-            let claseBadge = ""; let textoSemaforo = "";
-
-            if (prioridad === 'verde') { 
-                claseBadge = "badge-verde"; textoSemaforo = "Luz Verde (Avanzar Ya)"; verdes++; 
-            } else if (prioridad === 'amarillo') { 
-                claseBadge = "badge-amarillo"; textoSemaforo = "Luz Amarilla (Acompañar)"; amarillos++; 
-            } else { 
-                claseBadge = "badge-rojo"; textoSemaforo = "Luz Roja (Esperar Cond.)"; rojos++; 
-            }
-            
-            let fecha = prospecto.fecha_registro || "No registrada";
-            let nombre = prospecto.nombre || "Sin nombre";
-            let whatsapp = prospecto.whatsapp || "No reg.";
-            let modelo = prospecto.modelo || "No definido";
-            let uso = prospecto.uso || "No especificado";
-            let asesor = prospecto.asesor || "No asignado";
-            
-            const fila = document.createElement('tr');
-            fila.innerHTML = `
-                <td><span class="badge-semaforo ${claseBadge}">${textoSemaforo}</span></td>
-                <td>${fecha}</td>
-                <td style="font-weight:bold; color:#fff;">${nombre}</td>
-                <td>
-                    <a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" target="_blank" style="color:#00c851; text-decoration:none;">
-                        <i class="fab fa-whatsapp"></i> ${whatsapp}
-                    </a>
-                </td>
-                <td><span style="color:#f80101; font-weight:bold;">${modelo}</span></td>
-                <td>${uso}</td>
-                <td style="color:#00f0ff; font-weight:bold;">${asesor}</td>
-            `;
-            tbody.appendChild(fila);
-        });
+        actualizarIndicadoresKPI(0, 0, 0, 0);
+        return;
     }
     
-    actualizarIndicadoresKPI(total, verdes, amarillos, rojos);
+    registros.forEach((prospecto) => {
+        // Lógica de Semáforo basada en el dato 'prioridad' guardado desde el Paso 5
+        let prioridad = prospecto.prioridad || "rojo"; // Por defecto rojo si no se encuentra
+        let claseBadge = ""; let textoSemaforo = "";
 
-    // 2. Procesar y mostrar la actividad/compartidos de los asesores
-    procesarAuditoriaAsesores();
-}
-
-function procesarAuditoriaAsesores() {
-    const actividadAsesores = JSON.parse(localStorage.getItem('AUDITORIA_COMPARTIDOS_ASESORES')) || {};
-    let contenedorAsesores = document.getElementById('panel-asesores-resumen');
-    
-    // Si no existe el contenedor en tu HTML, lo creamos automáticamente para que siempre se muestre
-    if (!contenedorAsesores) {
-        contenedorAsesores = document.createElement('div');
-        contenedorAsesores.id = 'panel-asesores-resumen';
-        contenedorAsesores.style.cssText = "margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;";
-        
-        const panelGerente = document.getElementById('panel-gerente');
-        if (panelGerente) {
-            panelGerente.appendChild(contenedorAsesores);
-        } else {
-            document.body.appendChild(contenedorAsesores);
+        if (prioridad === 'verde') { 
+            claseBadge = "badge-verde"; textoSemaforo = "Luz Verde (Avanzar Ya)"; verdes++; 
+        } else if (prioridad === 'amarillo') { 
+            claseBadge = "badge-amarillo"; textoSemaforo = "Luz Amarilla (Acompañar)"; amarillos++; 
+        } else { 
+            claseBadge = "badge-rojo"; textoSemaforo = "Luz Roja (Esperar Cond.)"; rojos++; 
         }
-    }
-
-    let htmlAsesores = '<h3 style="color:#fff; margin-top:10px;">Desglose de Envíos por Asesor</h3><ul style="color:#ccc; list-style:none; padding:0;">';
-    
-    ASESORES_AGENCIA.forEach(asesorNombre => {
-        let datosAsesor = actividadAsesores[asesorNombre] || { totalCompartidos: 0 };
-        htmlAsesores += `<li style="padding: 8px 0; border-bottom: 1px solid #333;">${asesorNombre}: <strong style="color:#00f0ff;">${datosAsesor.totalCompartidos}</strong> enlaces compartidos</li>`;
+        
+        let fecha = prospecto.fecha_registro || "No registrada";
+        let nombre = prospecto.nombre || "Sin nombre";
+        let whatsapp = prospecto.whatsapp || "No reg.";
+        let modelo = prospecto.modelo || "No definido";
+        let uso = prospecto.uso || "No especificado";
+        let asesor = prospecto.asesor || "No asignado";
+        
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td><span class="badge-semaforo ${claseBadge}">${textoSemaforo}</span></td>
+            <td>${fecha}</td>
+            <td style="font-weight:bold; color:#fff;">${nombre}</td>
+            <td>
+                <a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" target="_blank" style="color:#00c851; text-decoration:none;">
+                    <i class="fab fa-whatsapp"></i> ${whatsapp}
+                </a>
+            </td>
+            <td><span style="color:#f80101; font-weight:bold;">${modelo}</span></td>
+            <td>${uso}</td>
+            <td style="color:#00f0ff; font-weight:bold;">${asesor}</td>
+        `;
+        tbody.appendChild(fila);
     });
     
-    htmlAsesores += '</ul>';
-    contenedorAsesores.innerHTML = htmlAsesores;
+    actualizarIndicadoresKPI(total, verdes, amarillos, rojos);
 }
 
 function actualizarIndicadoresKPI(t, v, a, r) {
@@ -135,10 +105,9 @@ function exportarAExcel() {
 }
 
 function limpiarPanelGerencial() {
-    if (confirm("¿Estás seguro de vaciar el panel de auditoría por completo y reiniciar los contadores de asesores?")) {
+    if (confirm("¿Estás seguro de vaciar el panel de auditoría por completo?")) {
         localStorage.removeItem('AUDITORIA_GERENCIAL_CARD');
-        localStorage.removeItem('AUDITORIA_COMPARTIDOS_ASESORES');
-        alert("Panel y contadores vaciados correctamente.");
+        alert("Panel vaciado correctamente.");
         location.reload();
     }
 }
