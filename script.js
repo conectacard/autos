@@ -292,8 +292,33 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function shareExperienceRobust() {
-    try { await navigator.share({ title: 'BMW Euromotors de Aguascalientes', url: window.location.href }); }
-    catch { playClick(); navigator.clipboard.writeText(window.location.href).then(() => { alert("¡Enlace de tarjeta copiado!"); }); }
+    // 1. Suma el punto al asesor que corresponda en la memoria
+    try {
+        const idAsesor = new URLSearchParams(window.location.search).get('asesor');
+        if (idAsesor) {
+            const claveMemoria = 'AUDITORIA_COMPARTIDOS_ASESORES';
+            let datos = JSON.parse(localStorage.getItem(claveMemoria)) || {};
+            let nombreAsesor = `Asesor ${idAsesor}`;
+            
+            datos[nombreAsesor] = datos[nombreAsesor] || { totalCompartidos: 0 };
+            datos[nombreAsesor].totalCompartidos++;
+            
+            localStorage.setItem(claveMemoria, JSON.stringify(datos));
+        }
+    } catch (error) {
+        // Si hay un error aquí, la tarjeta sigue funcionando sin bloquearse
+    }
+
+    // 2. Abre el menú para compartir o copia el enlace
+    try { 
+        await navigator.share({ title: 'BMW Euromotors de Aguascalientes', url: window.location.href }); 
+    }
+    catch { 
+        playClick(); 
+        navigator.clipboard.writeText(window.location.href).then(() => { 
+            alert("¡Enlace de tarjeta copiado!"); 
+        }); 
+    }
 }
 /* ==========================================================================
    MÓDULO DE CUESTIONARIO INTELIGENTE (POTENCIA EXTERNA + CONTROL INTERNO)
