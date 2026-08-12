@@ -484,10 +484,14 @@
 </div>
 
 <div class="cuestionario-paso" id="paso-10" style="display:none;">
-    <h4>PASO 10. Selecciona a tu asesor</h4>
+    <h4>PASO 10. Asesor Sugerido</h4>
     <div style="margin-top: 20px; padding: 15px; border-top: 2px solid #f80101;">
-        <p>Para brindarte una atención personalizada, elige a tu asesor de confianza:</p>
-        <select id="asesor-selector" style="width: 100%; padding: 10px; margin-top: 10px;">
+        <p>Con la información que nos diste, te sugerimos al asesor:</p>
+        <!-- Esta parte mostrará el nombre del asesor que el sistema elija -->
+        <h3 id="texto-asesor-sugerido" style="color: #f80101; text-align: center; margin: 10px 0;">ASESOR 1</h3>
+        
+        <p style="font-size: 14px; margin-top: 15px;">Pero si prefieres, puedes cambiarlo aquí:</p>
+        <select id="asesor-selector" style="width: 100%; padding: 10px; margin-top: 10px; background: #333; color: white; border: 1px solid #555;">
             <option value="ASESOR 1">ASESOR 1</option>
             <option value="ASESOR 2">ASESOR 2</option>
             <option value="ASESOR 3">ASESOR 3</option>
@@ -497,9 +501,9 @@
         </select>
     </div>
     <div style="margin-top: 20px;">
-        <button style="width: 100%; padding: 15px; background-color: #f80101; color: white; border: none; cursor: pointer;" onclick="finalizarCuestionarioYMostrarAsesores()">FINALIZAR Y ENVIAR</button>
+        <button style="width: 100%; padding: 15px; background-color: #f80101; color: white; border: none; cursor: pointer; font-weight: bold;" onclick="finalizarCuestionarioYMostrarAsesores()">FINALIZAR Y ENVIAR</button>
     </div>
     <div class="cuestionario-footer" style="margin-top: 20px;">
-        <button id="btn-q-prev" class="btn-q-nav" onclick="cambiarPasoCuestionario(-1)">Anterior</button>
+        <button id="btn-q-prev" class="btn-q-nav" onclick="cambiarPasoCuestionario(-1)" style="background: none; border: 1px solid #555; color: white; padding: 10px; cursor: pointer;">Anterior</button>
     </div>
 </div>

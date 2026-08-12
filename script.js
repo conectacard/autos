@@ -481,6 +481,13 @@ function cambiarPasoCuestionario(direccion) {
     const nuevoPasoEl = document.getElementById(`paso-${pasoActualCuestionario}`);
     if (nuevoPasoEl) nuevoPasoEl.style.display = 'block';
     
+    // ASIGNACIÓN AUTOMÁTICA
+    if (pasoActualCuestionario === 10) {
+        let turno = parseInt(localStorage.getItem('turnoAsesor') || '1');
+        document.getElementById('texto-asesor-sugerido').innerText = `ASESOR ${turno}`;
+        localStorage.setItem('turnoAsesor', (turno >= 6 ? 1 : turno + 1));
+    }
+    
     // Controlar visibilidad del botón "Anterior"
     document.getElementById('btn-q-prev').style.visibility = (pasoActualCuestionario === 1) ? 'hidden' : 'visible';
     
