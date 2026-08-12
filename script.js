@@ -484,7 +484,14 @@ function cambiarPasoCuestionario(direccion) {
     // ASIGNACIÓN AUTOMÁTICA
     if (pasoActualCuestionario === 10) {
         let turno = parseInt(localStorage.getItem('turnoAsesor') || '1');
-        document.getElementById('texto-asesor-sugerido').innerText = `ASESOR ${turno}`;
+        let nombreAsesor = `ASESOR ${turno}`;
+        
+        // 1. Cambiamos el texto
+        document.getElementById('texto-asesor-sugerido').innerText = nombreAsesor;
+        
+        // 2. CAMBIO CLAVE: Cambiamos también el valor del selector para que sepa qué asesor es
+        document.getElementById('asesor-selector').value = nombreAsesor;
+        
         localStorage.setItem('turnoAsesor', (turno >= 6 ? 1 : turno + 1));
     }
     
