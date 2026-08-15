@@ -1,13 +1,3 @@
-// --- CONFIGURACIÓN DE PAGO DE LA PYME ---
-const USA_STRIPE = false;
-const STRIPE_PUBLIC_KEY = ""; 
-const DATOS_BANCARIOS = {
-    banco: "",
-    clabe: "",
-    titular: "Nombre del Titular"
-};
-// ----------------------------------------
-
 const CONFIG = {
     whatsapp: "5214491472336", 
     whatsappAdicional: "5214491472336",
@@ -599,6 +589,7 @@ function inicializarAcordeonReseñas() {
     Object.keys(CONFIG.sucursales).forEach((key, index) => {
         const suc = CONFIG.sucursales[key];
         const numAsesor = index + 1;
+        
         const imgAsesor = `assets/brand/ASESOR${numAsesor}.jpg`;
         
         const btn = document.createElement('button');
@@ -630,16 +621,24 @@ function inicializarAcordeonReseñas() {
         panel.id = `resena-${key}-panel`;
         panel.className = 'sucursal-panel-content';
         
-        const mensajePrivado = encodeURIComponent(`Hola Gerencia, deseo calificar la atención del ASESOR ${numAsesor}. Mi calificación es de [1 al 5] estrellas y mis comentarios son: `);
-        const waGerenciaUrl = `https://wa.me/524491472336?text=${mensajePrivado}`;
-
         panel.innerHTML = `
             <div class="sucursal-info-block" style="text-align: center;">
                 <p class="suc-domicilio" style="font-weight: 700; color: #fff; font-size: 0.8rem;"><i class="fas fa-shield-alt" style="color: var(--brand-accent); margin-right: 4px;"></i> Evaluación Confidencial</p>
-                <p class="suc-horario" style="font-size: 0.7rem; margin-top: 4px; color: rgba(255,255,255,0.8);">Tu asesor no verá esta calificación; va directa a la Gerencia de Ventas.</p>
-                <div class="marca-elegante-asesor">ZENITH CAR</div>
+                <p class="suc-horario" style="font-size: 0.7rem; margin-top: 4px; color: rgba(255,255,255,0.8);">Tu asesor no verá esta calificación; va directa al panel gerencial.</p>
+                
+                <div style="margin: 10px 0; font-size: 1.3rem; letter-spacing: 4px;" id="estrellas-selector-${key}">
+                    <span onclick="marcarEstrellas('${key}', 1)" style="cursor:pointer; opacity:1;">⭐</span>
+                    <span onclick="marcarEstrellas('${key}', 2)" style="cursor:pointer; opacity:1;">⭐</span>
+                    <span onclick="marcarEstrellas('${key}', 3)" style="cursor:pointer; opacity:1;">⭐</span>
+                    <span onclick="marcarEstrellas('${key}', 4)" style="cursor:pointer; opacity:1;">⭐</span>
+                    <span onclick="marcarEstrellas('${key}', 5)" style="cursor:pointer; opacity:1;">⭐</span>
+                </div>
+                <input type="hidden" id="val-estrellas-${key}" value="5">
+                <textarea id="val-comentario-${key}" placeholder="Escribe tus comentarios aquí..." style="width: 100%; height: 60px; margin-top: 8px; padding: 6px; border-radius: 6px; border: none; font-size: 0.8rem; background: rgba(255,255,255,0.9); color: #000;"></textarea>
+                
+                <div class="marca-elegante-asesor" style="margin-top: 6px;">ZENITH CAR</div>
             </div>
-            <a href="${waGerenciaUrl}" target="_blank" class="btn-menu" style="background:#f80101; color:#fff; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border-radius:8px; font-weight:bold; margin-top:8px;"><i class="fas fa-star"></i> ⭐ Enviar Calificación (WhatsApp Gerencia)</a>
+            <button type="button" onclick="guardarReseñaEnPanel('${numAsesor}', '${key}')" class="btn-menu" style="background:#f80101; color:#fff; border:none; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border-radius:8px; font-weight:bold; margin-top:8px; cursor:pointer;"><i class="fas fa-check-circle"></i> Guardar y Enviar al Panel</button>
         `;
         
         contenedor.appendChild(btn);
@@ -658,4 +657,39 @@ function toggleReseñaAcordeon(key) {
     if (!estaVisible) {
         panel.style.display = 'flex';
     }
+}
+
+function marcarEstrellas(key, cantidad) {
+    document.getElementById(`val-estrellas-${key}`).value = cantidad;
+    const contenedorEstrellas = document.getElementById(`estrellas-selector-${key}`);
+    const estrellas = contenedorEstrellas.querySelectorAll('span');
+    estrellas.forEach((est, idx) => {
+        if (idx < cantidad) {
+            est.style.opacity = '1';
+            est.style.filter = 'none';
+        } else {
+            est.style.opacity = '0.3';
+            est.style.filter = 'grayscale(100%)';
+        }
+    });
+}
+
+function guardarReseñaEnPanel(numAsesor, key) {
+    playClick();
+    const estrellas = document.getElementById(`val-estrellas-${key}`).value;
+    const comentario = document.getElementById(`val-comentario-${key}`).value.trim();
+    
+    let historial = JSON.parse(localStorage.getItem('historial_reseñas_cards')) || [];
+    
+    historial.push({
+        fecha: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+        asesor: `ASESOR ${numAsesor}`,
+        calificacion: estrellas,
+        comentario: comentario || 'Sin comentarios'
+    });
+    
+    localStorage.setItem('historial_reseñas_cards', JSON.stringify(historial));
+    
+    alert('¡Calificación guardada con éxito para el panel gerencial!');
+    cerrarMenuReseñas();
 }

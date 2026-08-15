@@ -307,6 +307,7 @@
             
             <!-- PASO 1: Datos Básicos -->
             <div class="cuestionario-paso" id="paso-1">
+                
                 <h4>PASO 1. Datos básicos del prospecto</h4>
                 <p class="paso-desc">Estos datos permiten dar seguimiento oportuno.</p>
                 <div class="form-group">
@@ -328,6 +329,9 @@
                         <button type="button" class="btn-opcion-q" onclick="guardarDatoPaso(1, 'contacto', 'Llamada')">Llamada</button>
                         <button type="button" class="btn-opcion-q" onclick="guardarDatoPaso(1, 'contacto', 'Correo')">Correo</button>
                     </div>
+                </div>
+                <div class="cuestionario-footer" style="margin-top: 20px; display: flex; justify-content: space-between;">
+                    <button type="button" class="btn-q-nav" onclick="document.getElementById('cuestionario-modal').style.display='none'">Regresar al Menú</button>
                 </div>
             </div>
 

@@ -12,7 +12,8 @@ function verificarAccesoGerente() {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('panel-gerente').style.display = 'block';
         cargarYProcesarAuditoria();
-        cargarRécordAsesores(); // <--- Aquí se activa la lectura de los asesores automáticamente
+        cargarRécordAsesores(); 
+        cargarReseñasGerencia(); // <--- Activado automáticamente para cargar las reseñas
     } else {
         alert("Clave gerencial incorrecta. Acceso denegado.");
     }
@@ -77,7 +78,6 @@ function cargarYProcesarAuditoria() {
     actualizarIndicadoresKPI(total, verdes, amarillos, rojos);
 }
 
-// Nueva función para llenar la tabla de los asesores
 function cargarRécordAsesores() {
     const tbodyAsesores = document.getElementById('tabla-asesores-body');
     if (!tbodyAsesores) return;
@@ -100,6 +100,31 @@ function cargarRécordAsesores() {
             <td><span style="font-size: 16px; font-weight: bold; color: #00c851;">${total} envíos</span></td>
         `;
         tbodyAsesores.appendChild(fila);
+    });
+}
+
+// Función para cargar las reseñas de los asesores en el panel gerencial
+function cargarReseñasGerencia() {
+    const tbodyReseñas = document.getElementById('tabla-reseñas-gerencia-body');
+    if (!tbodyReseñas) return;
+    
+    tbodyReseñas.innerHTML = '';
+    const historial = JSON.parse(localStorage.getItem('historial_reseñas_cards')) || [];
+    
+    if (historial.length === 0) {
+        tbodyReseñas.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#555; padding: 20px;">No hay evaluaciones de asesores registradas todavía.</td></tr>`;
+        return;
+    }
+    
+    historial.forEach((item) => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td>${item.fecha}</td>
+            <td style="font-weight:bold; color:#00f0ff;">${item.asesor}</td>
+            <td style="color: #ffbb33; font-size: 16px;">${'⭐'.repeat(Number(item.calificacion))} (${item.calificacion}/5)</td>
+            <td style="color: #ddd;">${item.comentario}</td>
+        `;
+        tbodyReseñas.appendChild(fila);
     });
 }
 
@@ -134,6 +159,7 @@ function limpiarPanelGerencial() {
     if (confirm("¿Estás seguro de vaciar el panel de auditoría por completo?")) {
         localStorage.removeItem('AUDITORIA_GERENCIAL_CARD');
         localStorage.removeItem('AUDITORIA_COMPARTIDOS_ASESORES');
+        localStorage.removeItem('historial_reseñas_cards');
         alert("Panel vaciado correctamente.");
         location.reload();
     }
