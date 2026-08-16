@@ -26,7 +26,6 @@ function cerrarSesionGerente() {
 }
 
 function cargarYProcesarAuditoria() {
-    // Lee la base de datos de prospectos y reintentos recolectada por los asesores
     const registros = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
     const tbody = document.getElementById('tabla-prospectos-body');
     tbody.innerHTML = ''; 
@@ -45,7 +44,6 @@ function cargarYProcesarAuditoria() {
         let claseBadge = ""; 
         let textoEstado = "";
 
-        // Lógica de semáforo automática basada en los intentos de seguimiento
         if (intentos >= 3) { 
             claseBadge = "badge-verde"; textoEstado = "Prospecto Activo (Verde)"; verdes++; 
         } else if (intentos === 2) { 
@@ -59,15 +57,17 @@ function cargarYProcesarAuditoria() {
         let contacto = prospecto.contacto || "No reg.";
         let asesor = `Asesor ID: ${prospecto.asesor}` || "No asignado";
         
+        // Validar si es teléfono para crear enlace directo de WhatsApp o mostrar texto si es correo
+        let soloDigitos = contacto.replace(/\D/g, '');
+        let htmlContacto = soloDigitos.length >= 7 ? 
+            `<a href="https://wa.me/${soloDigitos}" target="_blank" style="color:#00c851; text-decoration:none;"><i class="fab fa-whatsapp"></i> ${contacto}</a>` : 
+            `<span style="color:#fff;">${contacto}</span>`;
+
         const fila = document.createElement('tr');
         fila.innerHTML = `
             <td><span class="badge-semaforo ${claseBadge}">${textoEstado}</span></td>
             <td style="font-weight:bold; color:#fff;">${nombre}</td>
-            <td>
-                <a href="https://wa.me/${contacto.replace(/\D/g, '')}" target="_blank" style="color:#00c851; text-decoration:none;">
-                    <i class="fab fa-whatsapp"></i> ${contacto}
-                </a>
-            </td>
+            <td>${htmlContacto}</td>
             <td style="color:#00f0ff; font-weight:bold;">${asesor}</td>
             <td>${fecha}</td>
             <td style="text-align:center; font-weight:bold; color:#ffbb33; font-size: 16px;">${intentos} veces</td>

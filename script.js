@@ -284,7 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
 async function shareExperienceRobust() {
     const idAsesor = new URLSearchParams(window.location.search).get('asesor');
 
-    // SI ES UN ASESOR, PEDIMOS DATOS Y APLICAMOS EL CONTROL ANTI-TRAMPAS
     if (idAsesor) {
         let nombreCliente = prompt("Escribe el NOMBRE del prospecto:");
         let contactoCliente = prompt("Escribe el TELÉFONO o CORREO del prospecto:");
@@ -294,29 +293,43 @@ async function shareExperienceRobust() {
             return;
         }
 
-        // 1. Guardar en la base de datos de prospectos y reintentos
+        // Normalizar contacto para evitar trampas por espacios, guiones o formatos
+        let contactoLimpio = contactoCliente.trim();
+        let telefonoSoloDigitos = contactoLimpio.replace(/\D/g, '');
+
         let baseDatosProspectos = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
-        let prospectoExistente = baseDatosProspectos.find(p => p.contacto === contactoCliente && p.asesor === idAsesor);
+        
+        // Busca si el número ya fue registrado por este asesor (incluso si cambiaron ligeramente el nombre)
+        let prospectoExistente = baseDatosProspectos.find(p => {
+            let pTelefono = (p.contacto || "").replace(/\D/g, '');
+            if (telefonoSoloDigitos.length >= 7) {
+                return pTelefono === telefonoSoloDigitos && p.asesor === idAsesor;
+            }
+            return p.contacto.toLowerCase() === contactoLimpio.toLowerCase() && p.asesor === idAsesor;
+        });
+
         let fechaHoraActual = new Date().toLocaleString();
 
         if (prospectoExistente) {
             prospectoExistente.intentos += 1;
             prospectoExistente.ultimaModificacion = fechaHoraActual;
-            alert("A este cliente ya se le había contactado antes. Se registró como un REINTENTO.");
+            prospectoExistente.nombre = nombreCliente; // Actualiza el nombre por si lo corrigieron
+            alert("⚠️ Este cliente ya había sido contactado antes. Se registró como un REINTENTO.");
         } else {
             baseDatosProspectos.push({
                 nombre: nombreCliente,
-                contacto: contactoCliente,
+                contacto: contactoLimpio,
                 asesor: idAsesor,
                 primerContacto: fechaHoraActual,
                 intentos: 1,
                 estado: "Prospecto Nuevo"
             });
-            alert("¡Prospecto registrado con éxito como NUEVO!");
+            alert("✅ ¡Prospecto registrado con éxito como NUEVO!");
         }
+
         localStorage.setItem('db_prospectos_agencia', JSON.stringify(baseDatosProspectos));
 
-        // 2. Sumar el punto en el récord de envíos del asesor
+        // Sumar punto en el récord del asesor
         const claveMemoria = 'AUDITORIA_COMPARTIDOS_ASESORES';
         let datosAsesores = JSON.parse(localStorage.getItem(claveMemoria)) || {};
         let nombreAsesorKey = `Asesor ${idAsesor}`;
@@ -325,16 +338,26 @@ async function shareExperienceRobust() {
         localStorage.setItem(claveMemoria, JSON.stringify(datosAsesores));
     }
 
-    // 3. Abrir el menú para compartir o copiar el enlace sin que truene si falta playClick
-    try { 
-        await navigator.share({ title: 'Agencia de Autos', url: window.location.href }); 
+    // Enlace y texto que activa la miniatura (og_share)
+    const textoCompartir = `¡Compré en ZENITH CAR! ¡Excelente experiencia! Te la comparto: ` + window.location.href;
+
+    // Abrir menú nativo si el celular lo soporta (mantiene og_share perfecto)
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'ZENITH CAR',
+                text: '¡Compré en ZENITH CAR! ¡Excelente experiencia!',
+                url: window.location.href
+            });
+            return;
+        } catch (e) {
+            // Si el usuario cancela, no hace nada extra
+        }
     }
-    catch { 
-        try { playClick(); } catch(e) {} // Por si no existe la función de sonido
-        navigator.clipboard.writeText(window.location.href).then(() => { 
-            alert("¡Enlace de tarjeta copiado al portapapeles!"); 
-        }); 
-    }
+
+    // Respaldo directo a WhatsApp para computadoras o navegadores sin share nativo
+    let urlWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir)}`;
+    window.open(urlWhatsApp, "_blank");
 }
 /* ==========================================================================
    MÓDULO DE CUESTIONARIO INTELIGENTE (POTENCIA EXTERNA + CONTROL INTERNO)
