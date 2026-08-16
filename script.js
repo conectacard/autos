@@ -284,64 +284,72 @@ document.addEventListener('DOMContentLoaded', () => {
 async function shareExperienceRobust() {
     const idAsesor = new URLSearchParams(window.location.search).get('asesor');
 
-    if (idAsesor) {
-        let nombreCliente = prompt("Escribe el NOMBRE del prospecto:");
-        let contactoCliente = prompt("Escribe el TELÉFONO o CORREO del prospecto:");
-
-        if (!nombreCliente || !contactoCliente) {
-            alert("⚠️ Debes ingresar el nombre y contacto para registrar tu seguimiento.");
-            return;
+    // Si es una visita pública normal (sin asesor), comparte directo sin pedir datos
+    if (!idAsesor) {
+        const textoPublico = `¡Compré en ZENITH CAR! ¡Excelente experiencia! Te la comparto: ` + window.location.href;
+        if (navigator.share) {
+            try { await navigator.share({ title: 'ZENITH CAR', text: '¡Excelente experiencia!', url: window.location.href }); return; } catch (e) {}
         }
-
-        // Normalizar contacto para evitar trampas por espacios, guiones o formatos
-        let contactoLimpio = contactoCliente.trim();
-        let telefonoSoloDigitos = contactoLimpio.replace(/\D/g, '');
-
-        let baseDatosProspectos = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
-        
-        // Busca si el número ya fue registrado por este asesor (incluso si cambiaron ligeramente el nombre)
-        let prospectoExistente = baseDatosProspectos.find(p => {
-            let pTelefono = (p.contacto || "").replace(/\D/g, '');
-            if (telefonoSoloDigitos.length >= 7) {
-                return pTelefono === telefonoSoloDigitos && p.asesor === idAsesor;
-            }
-            return p.contacto.toLowerCase() === contactoLimpio.toLowerCase() && p.asesor === idAsesor;
-        });
-
-        let fechaHoraActual = new Date().toLocaleString();
-
-        if (prospectoExistente) {
-            prospectoExistente.intentos += 1;
-            prospectoExistente.ultimaModificacion = fechaHoraActual;
-            prospectoExistente.nombre = nombreCliente; // Actualiza el nombre por si lo corrigieron
-            alert("⚠️ Este cliente ya había sido contactado antes. Se registró como un REINTENTO.");
-        } else {
-            baseDatosProspectos.push({
-                nombre: nombreCliente,
-                contacto: contactoLimpio,
-                asesor: idAsesor,
-                primerContacto: fechaHoraActual,
-                intentos: 1,
-                estado: "Prospecto Nuevo"
-            });
-            alert("✅ ¡Prospecto registrado con éxito como NUEVO!");
-        }
-
-        localStorage.setItem('db_prospectos_agencia', JSON.stringify(baseDatosProspectos));
-
-        // Sumar punto en el récord del asesor
-        const claveMemoria = 'AUDITORIA_COMPARTIDOS_ASESORES';
-        let datosAsesores = JSON.parse(localStorage.getItem(claveMemoria)) || {};
-        let nombreAsesorKey = `Asesor ${idAsesor}`;
-        datosAsesores[nombreAsesorKey] = datosAsesores[nombreAsesorKey] || { totalCompartidos: 0 };
-        datosAsesores[nombreAsesorKey].totalCompartidos++;
-        localStorage.setItem(claveMemoria, JSON.stringify(datosAsesores));
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(textoPublico)}`, "_blank");
+        return;
     }
 
-    // Enlace y texto que activa la miniatura (og_share)
-    const textoCompartir = `¡Compré en ZENITH CAR! ¡Excelente experiencia! Te la comparto: ` + window.location.href;
+    // SI ES UN ASESOR: 1. Pide los datos obligatorios
+    let nombreCliente = prompt("Escribe el NOMBRE del prospecto:");
+    let contactoCliente = prompt("Escribe el TELÉFONO o CORREO del prospecto:");
 
-    // Abrir menú nativo si el celular lo soporta (mantiene og_share perfecto)
+    if (!nombreCliente || !contactoCliente) {
+        alert("⚠️ Debes ingresar el nombre y contacto para registrar tu seguimiento.");
+        return; // Se detiene aquí y NO cuenta nada si el asesor cancela la ventanita
+    }
+
+    // Limpieza y normalización del teléfono para evitar trampas por espacios o guiones
+    let contactoLimpio = contactoCliente.trim();
+    let telefonoSoloDigitos = contactoLimpio.replace(/\D/g, '');
+
+    // 2. Procesa la base de datos local (Detecta si es nuevo o reintento)
+    let baseDatosProspectos = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
+    
+    let prospectoExistente = baseDatosProspectos.find(p => {
+        let pTelefono = (p.contacto || "").replace(/\D/g, '');
+        if (telefonoSoloDigitos.length >= 7) {
+            return pTelefono === telefonoSoloDigitos && p.asesor === idAsesor;
+        }
+        return p.contacto.toLowerCase() === contactoLimpio.toLowerCase() && p.asesor === idAsesor;
+    });
+
+    let fechaHoraActual = new Date().toLocaleString();
+
+    if (prospectoExistente) {
+        prospectoExistente.intentos += 1;
+        prospectoExistente.ultimaModificacion = fechaHoraActual;
+        prospectoExistente.nombre = nombreCliente; 
+        alert("⚠️ Este cliente ya había sido contactado antes. Se registró como un REINTENTO.");
+    } else {
+        baseDatosProspectos.push({
+            nombre: nombreCliente,
+            contacto: contactoLimpio,
+            asesor: idAsesor,
+            primerContacto: fechaHoraActual,
+            intentos: 1,
+            estado: "Prospecto Nuevo"
+        });
+        alert("✅ ¡Prospecto registrado con éxito como NUEVO!");
+    }
+
+    localStorage.setItem('db_prospectos_agencia', JSON.stringify(baseDatosProspectos));
+
+    // 3. Suma el punto en el récord de envíos del asesor
+    const claveMemoria = 'AUDITORIA_COMPARTIDOS_ASESORES';
+    let datosAsesores = JSON.parse(localStorage.getItem(claveMemoria)) || {};
+    let nombreAsesorKey = `Asesor ${idAsesor}`;
+    datosAsesores[nombreAsesorKey] = datosAsesores[nombreAsesorKey] || { totalCompartidos: 0 };
+    datosAsesores[nombreAsesorKey].totalCompartidos++;
+    localStorage.setItem(claveMemoria, JSON.stringify(datosAsesores));
+
+    // 4. CIERRE AUTOMÁTICO DEL CICLO: Abre WhatsApp de forma automática con la tarjeta y el texto
+    const textoMensaje = `¡Compré en ZENITH CAR! ¡Excelente experiencia! Te la comparto: ` + window.location.href;
+
     if (navigator.share) {
         try {
             await navigator.share({
@@ -351,12 +359,11 @@ async function shareExperienceRobust() {
             });
             return;
         } catch (e) {
-            // Si el usuario cancela, no hace nada extra
+            // Si el usuario cancela la ventana nativa, continúa con WhatsApp directo
         }
     }
 
-    // Respaldo directo a WhatsApp para computadoras o navegadores sin share nativo
-    let urlWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoCompartir)}`;
+    let urlWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoMensaje)}`;
     window.open(urlWhatsApp, "_blank");
 }
 /* ==========================================================================
