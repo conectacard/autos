@@ -291,10 +291,10 @@ async function shareExperienceRobust() {
 
         if (!nombreCliente || !contactoCliente) {
             alert("⚠️ Debes ingresar el nombre y contacto para registrar tu seguimiento.");
-            return; // Cancela el envío si no llena los datos
+            return;
         }
 
-        // Memoria local para contar nuevos vs reintentos
+        // 1. Guardar en la base de datos de prospectos y reintentos
         let baseDatosProspectos = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
         let prospectoExistente = baseDatosProspectos.find(p => p.contacto === contactoCliente && p.asesor === idAsesor);
         let fechaHoraActual = new Date().toLocaleString();
@@ -314,18 +314,25 @@ async function shareExperienceRobust() {
             });
             alert("¡Prospecto registrado con éxito como NUEVO!");
         }
-
         localStorage.setItem('db_prospectos_agencia', JSON.stringify(baseDatosProspectos));
+
+        // 2. Sumar el punto en el récord de envíos del asesor
+        const claveMemoria = 'AUDITORIA_COMPARTIDOS_ASESORES';
+        let datosAsesores = JSON.parse(localStorage.getItem(claveMemoria)) || {};
+        let nombreAsesorKey = `Asesor ${idAsesor}`;
+        datosAsesores[nombreAsesorKey] = datosAsesores[nombreAsesorKey] || { totalCompartidos: 0 };
+        datosAsesores[nombreAsesorKey].totalCompartidos++;
+        localStorage.setItem(claveMemoria, JSON.stringify(datosAsesores));
     }
 
-    // 2. Abre el menú para compartir o copia el enlace (Tu código original que ya funcionaba)
+    // 3. Abrir el menú para compartir o copiar el enlace sin que truene si falta playClick
     try { 
-        await navigator.share({ title: 'BMW Euromotors de Aguascalientes', url: window.location.href }); 
+        await navigator.share({ title: 'Agencia de Autos', url: window.location.href }); 
     }
     catch { 
-        playClick(); 
+        try { playClick(); } catch(e) {} // Por si no existe la función de sonido
         navigator.clipboard.writeText(window.location.href).then(() => { 
-            alert("¡Enlace de tarjeta copiado!"); 
+            alert("¡Enlace de tarjeta copiado al portapapeles!"); 
         }); 
     }
 }
