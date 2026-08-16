@@ -13,7 +13,7 @@ function verificarAccesoGerente() {
         document.getElementById('panel-gerente').style.display = 'block';
         cargarYProcesarAuditoria();
         cargarRécordAsesores(); 
-        cargarReseñasGerencia(); // <--- Activado automáticamente para cargar las reseñas
+        cargarReseñasGerencia(); 
     } else {
         alert("Clave gerencial incorrecta. Acceso denegado.");
     }
@@ -26,7 +26,8 @@ function cerrarSesionGerente() {
 }
 
 function cargarYProcesarAuditoria() {
-    const registros = JSON.parse(localStorage.getItem('AUDITORIA_GERENCIAL_CARD')) || [];
+    // Lee la base de datos de prospectos y reintentos recolectada por los asesores
+    const registros = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
     const tbody = document.getElementById('tabla-prospectos-body');
     tbody.innerHTML = ''; 
     
@@ -34,43 +35,42 @@ function cargarYProcesarAuditoria() {
     let verdes = 0; let amarillos = 0; let rojos = 0;
     
     if (total === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#555; padding: 20px;">No hay registros de prospectos todavía.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#555; padding: 20px;">No hay registros de prospectos todavía.</td></tr>`;
         actualizarIndicadoresKPI(0, 0, 0, 0);
         return;
     }
     
     registros.forEach((prospecto) => {
-        let prioridad = prospecto.prioridad || "rojo"; 
-        let claseBadge = ""; let textoSemaforo = "";
+        let intentos = prospecto.intentos || 1;
+        let claseBadge = ""; 
+        let textoEstado = "";
 
-        if (prioridad === 'verde') { 
-            claseBadge = "badge-verde"; textoSemaforo = "Luz Verde (Avanzar Ya)"; verdes++; 
-        } else if (prioridad === 'amarillo') { 
-            claseBadge = "badge-amarillo"; textoSemaforo = "Luz Amarilla (Acompañar)"; amarillos++; 
+        // Lógica de semáforo automática basada en los intentos de seguimiento
+        if (intentos >= 3) { 
+            claseBadge = "badge-verde"; textoEstado = "Prospecto Activo (Verde)"; verdes++; 
+        } else if (intentos === 2) { 
+            claseBadge = "badge-amarillo"; textoEstado = "En Seguimiento (Amarillo)"; amarillos++; 
         } else { 
-            claseBadge = "badge-rojo"; textoSemaforo = "Luz Roja (Esperar Cond.)"; rojos++; 
+            claseBadge = "badge-rojo"; textoEstado = "Nuevo / Esperando (Rojo)"; rojos++; 
         }
         
-        let fecha = prospecto.fecha_registro || "No registrada";
+        let fecha = prospecto.primerContacto || "No registrada";
         let nombre = prospecto.nombre || "Sin nombre";
-        let whatsapp = prospecto.whatsapp || "No reg.";
-        let modelo = prospecto.modelo || "No definido";
-        let uso = prospecto.uso || "No especificado";
-        let asesor = prospecto.asesor || "No asignado";
+        let contacto = prospecto.contacto || "No reg.";
+        let asesor = `Asesor ID: ${prospecto.asesor}` || "No asignado";
         
         const fila = document.createElement('tr');
         fila.innerHTML = `
-            <td><span class="badge-semaforo ${claseBadge}">${textoSemaforo}</span></td>
-            <td>${fecha}</td>
+            <td><span class="badge-semaforo ${claseBadge}">${textoEstado}</span></td>
             <td style="font-weight:bold; color:#fff;">${nombre}</td>
             <td>
-                <a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" target="_blank" style="color:#00c851; text-decoration:none;">
-                    <i class="fab fa-whatsapp"></i> ${whatsapp}
+                <a href="https://wa.me/${contacto.replace(/\D/g, '')}" target="_blank" style="color:#00c851; text-decoration:none;">
+                    <i class="fab fa-whatsapp"></i> ${contacto}
                 </a>
             </td>
-            <td><span style="color:#f80101; font-weight:bold;">${modelo}</span></td>
-            <td>${uso}</td>
             <td style="color:#00f0ff; font-weight:bold;">${asesor}</td>
+            <td>${fecha}</td>
+            <td style="text-align:center; font-weight:bold; color:#ffbb33; font-size: 16px;">${intentos} veces</td>
         `;
         tbody.appendChild(fila);
     });
@@ -86,24 +86,23 @@ function cargarRécordAsesores() {
     const key = 'AUDITORIA_COMPARTIDOS_ASESORES';
     let datosAsesores = JSON.parse(localStorage.getItem(key)) || {};
     
-    let asesoresLista = ["Asesor 1", "Asesor 2", "Asesor 3", "Asesor 4", "Asesor 5", "Asesor 6"];
-    
-    asesoresLista.forEach((nombreAsesor) => {
+    ASESORES_AGENCIA.forEach((nombreAsesor, index) => {
+        let idAsesorStr = String(index + 1);
         let total = 0;
+        
         if (datosAsesores[nombreAsesor] && datosAsesores[nombreAsesor].totalCompartidos) {
             total = datosAsesores[nombreAsesor].totalCompartidos;
         }
         
         const fila = document.createElement('tr');
         fila.innerHTML = `
-            <td style="font-weight:bold; color:#00f0ff;">${nombreAsesor}</td>
+            <td style="font-weight:bold; color:#00f0ff;">${nombreAsesor} (ID: ${idAsesorStr})</td>
             <td><span style="font-size: 16px; font-weight: bold; color: #00c851;">${total} envíos</span></td>
         `;
         tbodyAsesores.appendChild(fila);
     });
 }
 
-// Función para cargar las reseñas de los asesores en el panel gerencial
 function cargarReseñasGerencia() {
     const tbodyReseñas = document.getElementById('tabla-reseñas-gerencia-body');
     if (!tbodyReseñas) return;
@@ -136,20 +135,20 @@ function actualizarIndicadoresKPI(t, v, a, r) {
 }
 
 function exportarAExcel() {
-    const registros = JSON.parse(localStorage.getItem('AUDITORIA_GERENCIAL_CARD')) || [];
+    const registros = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
     if (registros.length === 0) { alert("No hay datos para exportar."); return; }
     
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-    csvContent += "Fecha,Prospecto,WhatsApp,Modelo Interes,Uso Destinado,Prioridad,Asesor Asignado\n";
+    csvContent += "Cliente,Contacto,Asesor,Primer Contacto,Intentos,Estado\n";
     
     registros.forEach((p) => {
-        csvContent += `"${p.fecha_registro || ''}","${p.nombre || ''}","${p.whatsapp || ''}","${p.modelo || ''}","${p.uso || ''}","${p.prioridad || ''}","${p.asesor || ''}"\n`;
+        csvContent += `"${p.nombre || ''}","${p.contacto || ''}","Asesor ID: ${p.asesor || ''}","${p.primerContacto || ''}","${p.intentos || 1}","${p.estado || ''}"\n`;
     });
     
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "Reporte_Leads_Agencia_Autos.csv");
+    link.setAttribute("download", "Reporte_Seguimiento_Prospectos.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -157,7 +156,7 @@ function exportarAExcel() {
 
 function limpiarPanelGerencial() {
     if (confirm("¿Estás seguro de vaciar el panel de auditoría por completo?")) {
-        localStorage.removeItem('AUDITORIA_GERENCIAL_CARD');
+        localStorage.removeItem('db_prospectos_agencia');
         localStorage.removeItem('AUDITORIA_COMPARTIDOS_ASESORES');
         localStorage.removeItem('historial_reseñas_cards');
         alert("Panel vaciado correctamente.");

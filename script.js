@@ -282,24 +282,43 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function shareExperienceRobust() {
-    // 1. Suma el punto al asesor que corresponda en la memoria
-    try {
-        const idAsesor = new URLSearchParams(window.location.search).get('asesor');
-        if (idAsesor) {
-            const claveMemoria = 'AUDITORIA_COMPARTIDOS_ASESORES';
-            let datos = JSON.parse(localStorage.getItem(claveMemoria)) || {};
-            let nombreAsesor = `Asesor ${idAsesor}`;
-            
-            datos[nombreAsesor] = datos[nombreAsesor] || { totalCompartidos: 0 };
-            datos[nombreAsesor].totalCompartidos++;
-            
-            localStorage.setItem(claveMemoria, JSON.stringify(datos));
+    const idAsesor = new URLSearchParams(window.location.search).get('asesor');
+
+    // SI ES UN ASESOR, PEDIMOS DATOS Y APLICAMOS EL CONTROL ANTI-TRAMPAS
+    if (idAsesor) {
+        let nombreCliente = prompt("Escribe el NOMBRE del prospecto:");
+        let contactoCliente = prompt("Escribe el TELÉFONO o CORREO del prospecto:");
+
+        if (!nombreCliente || !contactoCliente) {
+            alert("⚠️ Debes ingresar el nombre y contacto para registrar tu seguimiento.");
+            return; // Cancela el envío si no llena los datos
         }
-    } catch (error) {
-        // Si hay un error aquí, la tarjeta sigue funcionando sin bloquearse
+
+        // Memoria local para contar nuevos vs reintentos
+        let baseDatosProspectos = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
+        let prospectoExistente = baseDatosProspectos.find(p => p.contacto === contactoCliente && p.asesor === idAsesor);
+        let fechaHoraActual = new Date().toLocaleString();
+
+        if (prospectoExistente) {
+            prospectoExistente.intentos += 1;
+            prospectoExistente.ultimaModificacion = fechaHoraActual;
+            alert("A este cliente ya se le había contactado antes. Se registró como un REINTENTO.");
+        } else {
+            baseDatosProspectos.push({
+                nombre: nombreCliente,
+                contacto: contactoCliente,
+                asesor: idAsesor,
+                primerContacto: fechaHoraActual,
+                intentos: 1,
+                estado: "Prospecto Nuevo"
+            });
+            alert("¡Prospecto registrado con éxito como NUEVO!");
+        }
+
+        localStorage.setItem('db_prospectos_agencia', JSON.stringify(baseDatosProspectos));
     }
 
-    // 2. Abre el menú para compartir o copia el enlace
+    // 2. Abre el menú para compartir o copia el enlace (Tu código original que ya funcionaba)
     try { 
         await navigator.share({ title: 'BMW Euromotors de Aguascalientes', url: window.location.href }); 
     }
