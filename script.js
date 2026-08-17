@@ -569,19 +569,14 @@ function cambiarPasoCuestionario(direccion) {
 function finalizarCuestionarioYMostrarAsesores() {
     if (typeof playClick === 'function') playClick();
     
-    // --- AQUÍ ESTABA LA FALLA: Capturamos los valores del formulario ANTES de guardar ---
     DATA_PROSPECTO.fecha_registro = new Date().toLocaleString();
     
-    // Usamos los IDs correctos que confirmamos (q-nombre y q-whatsapp)
     DATA_PROSPECTO.nombre = document.getElementById('q-nombre')?.value || DATA_PROSPECTO.nombre;
     DATA_PROSPECTO.whatsapp = document.getElementById('q-whatsapp')?.value || DATA_PROSPECTO.whatsapp;
-    
-    // Aseguramos que otros campos también estén al día por si acaso
     DATA_PROSPECTO.modelo = document.getElementById('modelo')?.value || DATA_PROSPECTO.modelo;
     DATA_PROSPECTO.uso = document.getElementById('uso')?.value || DATA_PROSPECTO.uso;
     
-    // --- LÓGICA INTEGRADA DE SEMÁFORO Y ASESOR ---
-    // 1. Semáforo basado en el tiempo (Mejorado para detectar variaciones en el texto)
+    // Semáforo
     let t = (DATA_PROSPECTO.tiempo || "").toString().toLowerCase();
     if (t.includes("semana") || t.includes("mes")) {
         DATA_PROSPECTO.semaforo = "Verde";
@@ -591,46 +586,53 @@ function finalizarCuestionarioYMostrarAsesores() {
         DATA_PROSPECTO.semaforo = "Rojo";
     }
 
-    // 2. Asesor capturado del selector (id="asesor-selector" que está en el paso 9)
     let asesorSelect = document.getElementById('asesor-selector');
-    // Si el valor existe en el selector, lo tomamos; si no, dejamos el que ya estaba o asignamos el predeterminado
     DATA_PROSPECTO.asesor = (asesorSelect && asesorSelect.value) ? asesorSelect.value : (DATA_PROSPECTO.asesor || "ASESOR 1");
     
-    // CONTROL INTERNO: Blindaje y Auditoría Gerencial
+    // Guardar para el Gerente
     try {
-        let registrosExistentes = JSON.parse(localStorage.getItem('AUDITORIA_GERENCIAL_CARD')) || [];
-        registrosExistentes.push(DATA_PROSPECTO);
-        localStorage.setItem('AUDITORIA_GERENCIAL_CARD', JSON.stringify(registrosExistentes));
+        let registrosExistentes = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
+        
+        let prospectoParaGerente = {
+            nombre: DATA_PROSPECTO.nombre || "Sin nombre",
+            contacto: DATA_PROSPECTO.whatsapp || "No reg.",
+            asesor: (DATA_PROSPECTO.asesor || "1").replace(/\D/g, '') || "1",
+            primerContacto: DATA_PROSPECTO.fecha_registro,
+            intentos: 1,
+            estado: DATA_PROSPECTO.semaforo
+        };
+
+        registrosExistentes.push(prospectoParaGerente);
+        localStorage.setItem('db_prospectos_agencia', JSON.stringify(registrosExistentes));
     } catch (e) {
-        console.error("Error al blindar datos en almacenamiento local:", e);
+        console.error("Error al guardar en el panel gerencial:", e);
     }
     
-    // 1. Cerrar el modal del cuestionario primero de forma limpia
-    document.getElementById('cuestionario-modal').style.display = 'none';
+    let modalCuestionario = document.getElementById('cuestionario-modal');
+    if(modalCuestionario) modalCuestionario.style.display = 'none';
     
-    // 2. Mostrar la leyenda de agradecimiento
     alert("¡Muchas gracias! Tus datos han sido procesados de forma segura. Ahora puedes seleccionar a tu asesor especializado.");
     
-    // 3. POTENCIA EXTERNA: Abrimos el menú de asesores
     if (typeof abrirMenu === 'function') {
         abrirMenu();
-    } else {
-        console.log("No se encontró la función abrirMenu");
     }
 }
 
-// --- FUNCIONES PARA EL NUEVO MENÚ INDEPENDIENTE DE RESEÑAS ---
+// --- FUNCIONES COMPLETAS PARA ABRIR Y GESTIONAR LAS RESEÑAS ---
+
 function abrirMenuReseñas() {
-    playClick();
+    if (typeof playClick === 'function') playClick();
     const menu = document.getElementById('miMenuReseñas');
     if(menu) {
         menu.style.display = 'flex';
         inicializarAcordeonReseñas();
+    } else {
+        console.error("No se encontró el elemento 'miMenuReseñas' en el HTML.");
     }
 }
 
 function cerrarMenuReseñas() {
-    playClick();
+    if (typeof playClick === 'function') playClick();
     const menu = document.getElementById('miMenuReseñas');
     if(menu) {
         menu.style.display = 'none';
@@ -642,10 +644,11 @@ function inicializarAcordeonReseñas() {
     if(!contenedor) return;
     contenedor.innerHTML = '';
 
+    // Verifica que CONFIG y sucursales existan
+    if (typeof CONFIG === 'undefined' || !CONFIG.sucursales) return;
+
     Object.keys(CONFIG.sucursales).forEach((key, index) => {
-        const suc = CONFIG.sucursales[key];
         const numAsesor = index + 1;
-        
         const imgAsesor = `assets/brand/ASESOR${numAsesor}.jpg`;
         
         const btn = document.createElement('button');
@@ -656,8 +659,8 @@ function inicializarAcordeonReseñas() {
         wrapImg.innerHTML = `<img src="${imgAsesor}" alt="Asesor ${numAsesor}" class="img-miniatura-asesor" onerror="this.src='assets/brand/logo-mini.png'">`;
         wrapImg.onclick = (e) => {
             e.stopPropagation();
-            playClick();
-            openLightbox(imgAsesor, [imgAsesor], true);
+            if (typeof playClick === 'function') playClick();
+            if (typeof openLightbox === 'function') openLightbox(imgAsesor, [imgAsesor], true);
         };
         
         const txtLabel = document.createElement('div');
@@ -676,6 +679,7 @@ function inicializarAcordeonReseñas() {
         const panel = document.createElement('div');
         panel.id = `resena-${key}-panel`;
         panel.className = 'sucursal-panel-content';
+        panel.style.display = 'none'; // Oculto por defecto
         
         panel.innerHTML = `
             <div class="sucursal-info-block" style="text-align: center;">
@@ -701,6 +705,54 @@ function inicializarAcordeonReseñas() {
         contenedor.appendChild(panel);
     });
 }
+
+function toggleReseñaAcordeon(key) {
+    const panel = document.getElementById(`resena-${key}-panel`);
+    if (panel) {
+        if (panel.style.display === 'block') {
+            panel.style.display = 'none';
+        } else {
+            // Cierra los demás paneles si quieres que solo uno esté abierto a la vez
+            document.querySelectorAll('.sucursal-panel-content').forEach(p => p.style.display = 'none');
+            panel.style.display = 'block';
+        }
+    }
+}
+
+function marcarEstrellas(key, valor) {
+    let inputEstrellas = document.getElementById(`val-estrellas-${key}`);
+    if(inputEstrellas) {
+        inputEstrellas.value = valor;
+    }
+}
+
+function guardarReseñaEnPanel(numAsesor, key) {
+    if (typeof playClick === 'function') playClick();
+    
+    let calificacionInput = document.getElementById(`val-estrellas-${key}`);
+    let comentarioInput = document.getElementById(`val-comentario-${key}`);
+    
+    let calificacion = calificacionInput ? calificacionInput.value : "5";
+    let comentario = comentarioInput ? comentarioInput.value : "Sin comentario";
+    let nombreAsesor = `Asesor ${numAsesor}`;
+
+    try {
+        let historial = JSON.parse(localStorage.getItem('historial_reseñas_cards')) || [];
+        historial.push({
+            fecha: new Date().toLocaleString(),
+            asesor: nombreAsesor,
+            calificacion: calificacion,
+            comentario: comentario
+        });
+        localStorage.setItem('historial_reseñas_cards', JSON.stringify(historial));
+        alert("¡Evaluación enviada con éxito al panel del gerente!");
+        cerrarMenuReseñas();
+    } catch (e) {
+        console.error("Error al guardar la reseña:", e);
+    }
+}
+
+// (Conserva tus funciones originales de abrirMenuReseñas, cerrarMenuReseñas e inicializarAcordeonReseñas intactas)
 
 function toggleReseñaAcordeon(key) {
     playClick();
