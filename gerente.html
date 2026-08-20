@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Gerencial - Control de Leads Agencia</title>
+    <title data-i18n="gerente_html_title">Panel Gerencial - Control de Leads Agencia</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Arial', sans-serif; background-color: #111; color: #fff; margin: 0; padding: 20px; }
@@ -49,51 +49,66 @@
 <body>
 
     <div class="container">
-        <!-- PANTALLA DE ACCESO -->
-        <div id="login-screen" class="login-box">
-            <i class="fas fa-lock" style="font-size: 40px; color: #f80101; margin-bottom: 10px;"></i>
-            <h2>Dirección Comercial</h2>
-            <p style="color: #aaa; font-size: 14px;">Ingrese la clave gerencial de auditoría</p>
-            <input type="password" id="pass-input" placeholder="Clave de acceso...">
-            <button onclick="verificarAccesoGerente()">Ingresar al Panel</button>
-        </div>
+    <!-- PANTALLA DE ACCESO -->
+    <div id="login-screen" class="login-box">
+        <i class="fas fa-lock" style="font-size: 40px; color: #f80101; margin-bottom: 10px;"></i>
+        <h2 data-i18n="gerente_login_titulo">Dirección Comercial</h2>
+        <p data-i18n="gerente_login_desc" style="color: #aaa; font-size: 14px;">Ingrese la clave gerencial de auditoría</p>
+        <input type="password" id="pass-input" data-i18n-placeholder="gerente_placeholder_clave" placeholder="Clave de acceso...">
+        <button onclick="verificarAccesoGerente()" data-i18n="gerente_btn_ingresar">Ingresar al Panel</button>
+    </div>
 
-        <!-- PANEL GERENCIAL PRINCIPAL -->
-        <div id="panel-gerente" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h1 style="margin: 0; font-size: 24px;">Agencia de Autos - Control de Auditoría</h1>
-                <button onclick="cerrarSesionGerente()" class="btn btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</button>
+    <!-- PANEL GERENCIAL PRINCIPAL -->
+    <div id="panel-gerente" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 data-i18n="gerente_titulo_principal" style="margin: 0; font-size: 24px;">Agencia de Autos - Control de Auditoría</h1>
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <!-- Selector de idioma independiente para gerencia -->
+                <select id="selector-idioma-gerente" onchange="cambiarIdiomaGerente(this.value)" style="background: #222; color: #fff; border: 1px solid #444; padding: 5px; border-radius: 4px;">
+                    <option value="es">Español</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="pt">Português</option>
+                    <option value="ko">한국어</option>
+                    <option value="zh">中文</option>
+                </select>
+                
+                <button onclick="cerrarSesionGerente()" class="btn btn-logout"><i class="fas fa-sign-out-alt"></i> <span data-i18n="btn_salir">Salir</span></button>
             </div>
+        </div>
 
             <!-- TARJETAS METRICAS KPI -->
             <div class="kpi-container">
                 <div class="kpi-card border-total">
-                    <h3>Total Prospectos</h3>
+                    <h3 data-i18n="gerente_kpi_total">Total Prospectos</h3>
                     <p id="kpi-total">0</p>
                 </div>
                 <div class="kpi-card border-verde">
-                    <h3>Avanzar Ya (Verde)</h3>
+                    <h3 data-i18n="gerente_kpi_verde">Avanzar Ya (Verde)</h3>
                     <p id="kpi-verde">0</p>
                 </div>
                 <div class="kpi-card border-amarillo">
-                    <h3>En Seguimiento (Amarillo)</h3>
+                    <h3 data-i18n="gerente_kpi_amarillo">En Seguimiento (Amarillo)</h3>
                     <p id="kpi-amarillo">0</p>
                 </div>
                 <div class="kpi-card border-rojo">
-                    <h3>Esperar Condiciones (Rojo)</h3>
+                    <h3 data-i18n="gerente_kpi_rojo">Esperar Condiciones (Rojo)</h3>
                     <p id="kpi-rojo">0</p>
                 </div>
             </div>
 
-            <h2 style="text-align: left; font-size: 18px; margin-bottom: 15px;">Estatus de Maduración del Cliente</h2>
+            <h2 data-i18n="gerente_seccion_estatus" style="text-align: left; font-size: 18px; margin-bottom: 15px;">Estatus de Maduración del Cliente</h2>
 
-            <!-- BARRA DE ACCIONES CON BOTONES NUEVOS -->
+            <<!-- BARRA DE ACCIONES CON BOTONES NUEVOS -->
             <div class="action-bar">
                 <button onclick="exportarAExcel()" class="btn btn-excel">
-                    <i class="fas fa-file-excel"></i> Descargar Excel (CSV)
+                    <i class="fas fa-file-excel"></i> <span data-i18n="gerente_btn_excel">Descargar Excel (CSV)</span>
                 </button>
                 <button onclick="limpiarPanelGerencial()" class="btn btn-trash">
-                    <i class="fas fa-trash-alt"></i> Limpiar Panel
+                    <i class="fas fa-trash-alt"></i> <span data-i18n="gerente_btn_limpiar">Limpiar Panel</span>
                 </button>
             </div>
 
@@ -102,12 +117,12 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ESTADO</th>
-                            <th>CLIENTE / PROSPECTO</th>
-                            <th>TELÉFONO / CONTACTO</th>
-                            <th>ASESOR ASIGNADO</th>
-                            <th>PRIMER CONTACTO / FECHA</th>
-                            <th>INTENTOS DE SEGUIMIENTO</th>
+                            <th data-i18n="gerente_th_estado">ESTADO</th>
+                            <th data-i18n="gerente_th_cliente">CLIENTE / PROSPECTO</th>
+                            <th data-i18n="gerente_th_contacto">TELÉFONO / CONTACTO</th>
+                            <th data-i18n="gerente_th_asesor">ASESOR ASIGNADO</th>
+                            <th data-i18n="gerente_th_fecha">PRIMER CONTACTO / FECHA</th>
+                            <th data-i18n="gerente_th_intentos">INTENTOS DE SEGUIMIENTO</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-prospectos-body">
@@ -117,13 +132,13 @@
             </div>
 
             <!-- RÉCORD DE COMPARTIDOS DE ASESORES -->
-            <h2 style="text-align: left; font-size: 18px; margin: 30px 0 15px 0;">Récord de Envíos de Enlace por Asesor</h2>
+            <h2 data-i18n="gerente_seccion_record" style="text-align: left; font-size: 18px; margin: 30px 0 15px 0;">Récord de Envíos de Enlace por Asesor</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>ASESOR</th>
-                            <th>TOTAL DE ENVÍOS / COMPARTIDOS</th>
+                            <th data-i18n="gerente_th_asesor_nombre">ASESOR</th>
+                            <th data-i18n="gerente_th_total_envios">TOTAL DE ENVÍOS / COMPARTIDOS</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-asesores-body">
@@ -133,15 +148,15 @@
             </div>
 
             <!-- SECCIÓN NUEVA: RESEÑAS Y EVALUACIONES CONFIDENCIALES DE ASESORES -->
-            <h2 style="text-align: left; font-size: 18px; margin: 30px 0 15px 0;">Evaluaciones Confidenciales y Reseñas de Asesores</h2>
+            <h2 data-i18n="gerente_seccion_reseñas" style="text-align: left; font-size: 18px; margin: 30px 0 15px 0;">Evaluaciones Confidenciales y Reseñas de Asesores</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>FECHA</th>
-                            <th>ASESOR EVALUADO</th>
-                            <th>CALIFICACIÓN</th>
-                            <th>COMENTARIO DEL CLIENTE</th>
+                            <th data-i18n="gerente_th_fecha_res">FECHA</th>
+                            <th data-i18n="gerente_th_asesor_eval">ASESOR EVALUADO</th>
+                            <th data-i18n="gerente_th_calificacion">CALIFICACIÓN</th>
+                            <th data-i18n="gerente_th_comentario">COMENTARIO DEL CLIENTE</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-reseñas-gerencia-body">
@@ -152,7 +167,9 @@
         </div>
     </div>
 
-    <!-- Enlace al cerebro que controla la lógica -->
+    <!-- Archivos de traducción y lógica gerencial vinculados en orden estricto -->
+    <script src="lang.js"></script>
+    <script src="gerente-lang.js"></script>
     <script src="gerente-core.js"></script>
 </body>
 </html>

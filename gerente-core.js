@@ -6,9 +6,31 @@
 const CLAVE_GERENCIAL_ACCESO = "AUTO2026"; 
 const ASESORES_AGENCIA = ["Asesor 1", "Asesor 2", "Asesor 3", "Asesor 4", "Asesor 5", "Asesor 6"];
 
+// --- INICIALIZACIÓN Y SEGURIDAD DEL PANEL ---
+
+document.addEventListener("DOMContentLoaded", () => {
+    const idiomaGerenteActual = localStorage.getItem('sipv_lang_gerente') || 'es';
+    const selectorSelect = document.getElementById('selector-idioma-gerente');
+    if (selectorSelect) {
+        selectorSelect.value = idiomaGerenteActual;
+    }
+
+    if (typeof DICTIONARY !== 'undefined' && DICTIONARY[idiomaGerenteActual]) {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (DICTIONARY[idiomaGerenteActual][key]) {
+                el.innerText = DICTIONARY[idiomaGerenteActual][key];
+            }
+        });
+    }
+});
+
 function verificarAccesoGerente() {
     const inputClave = document.getElementById('pass-input').value;
     if (inputClave === CLAVE_GERENCIAL_ACCESO) {
+        // Guardamos la sesión para que sobreviva al F5
+        sessionStorage.setItem('gerencia_autenticada', 'true');
+        
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('panel-gerente').style.display = 'block';
         cargarYProcesarAuditoria();
@@ -20,14 +42,36 @@ function verificarAccesoGerente() {
 }
 
 function cerrarSesionGerente() {
+    // Borramos la sesión al salir manualmente
+    sessionStorage.removeItem('gerencia_autenticada');
+    
     document.getElementById('pass-input').value = '';
     document.getElementById('panel-gerente').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
 }
 
+// Autologin al presionar F5 o recargar si ya estaba autenticado
+document.addEventListener("DOMContentLoaded", () => {
+    if (sessionStorage.getItem('gerencia_autenticada') === 'true') {
+        const loginScreen = document.getElementById('login-screen');
+        const panelGerente = document.getElementById('panel-gerente');
+        
+        if (loginScreen) loginScreen.style.display = 'none';
+        if (panelGerente) panelGerente.style.display = 'block';
+        
+        // Ejecutamos las funciones de carga de datos para que el panel no aparezca vacío
+        if (typeof cargarYProcesarAuditoria === 'function') cargarYProcesarAuditoria();
+        if (typeof cargarRécordAsesores === 'function') cargarRécordAsesores(); 
+        if (typeof cargarReseñasGerencia === 'function') cargarReseñasGerencia(); 
+    }
+});
+
+// --- LÓGICA DE AUDITORÍA Y KPIs CORREGIDA ---
+
 function cargarYProcesarAuditoria() {
     const registros = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
     const tbody = document.getElementById('tabla-prospectos-body');
+    if (!tbody) return;
     tbody.innerHTML = ''; 
     
     let total = registros.length;
@@ -41,23 +85,38 @@ function cargarYProcesarAuditoria() {
     
     registros.forEach((prospecto) => {
         let intentos = prospecto.intentos || 1;
+        let tiempoCompra = prospecto.tiempo ? prospecto.tiempo.trim() : "";
         let claseBadge = ""; 
         let textoEstado = "";
 
-        if (intentos >= 3) { 
-            claseBadge = "badge-verde"; textoEstado = "Prospecto Activo (Verde)"; verdes++; 
-        } else if (intentos === 2) { 
-            claseBadge = "badge-amarillo"; textoEstado = "En Seguimiento (Amarillo)"; amarillos++; 
-        } else { 
-            claseBadge = "badge-rojo"; textoEstado = "Nuevo / Esperando (Rojo)"; rojos++; 
+        const lang = localStorage.getItem('sipv_lang_gerente') || 'es';
+        const textoVeces = DICTIONARY[lang]?.gerente_texto_veces || "veces";
+
+        let claveStatus = "status_red";
+        if (tiempoCompra === "Esta semana" || tiempoCompra === "Este mes" || tiempoCompra.startsWith("Solicitó:")) {
+            claseBadge = "badge-verde";
+            claveStatus = "status_green";
+            verdes++;
+        } else if (tiempoCompra === "Dentro de 3 meses" || tiempoCompra === "Dentro de 6 meses") {
+            claseBadge = "badge-amarillo";
+            claveStatus = "status_yellow";
+            amarillos++;
+        } else {
+            claseBadge = "badge-rojo";
+            claveStatus = "status_red";
+            rojos++;
         }
+
+        const textoEstadoTraducido = DICTIONARY[lang]?.[claveStatus] || "Adelante con la venta";
+
+        prospecto.estado = (tiempoCompra === "Esta semana" || tiempoCompra === "Este mes") ? "Verde" : 
+                           (tiempoCompra === "Dentro de 3 meses" || tiempoCompra === "Dentro de 6 meses") ? "Amarillo" : "Rojo";
         
         let fecha = prospecto.primerContacto || "No registrada";
         let nombre = prospecto.nombre || "Sin nombre";
         let contacto = prospecto.contacto || "No reg.";
         let asesor = `Asesor ID: ${prospecto.asesor}` || "No asignado";
         
-        // Validar si es teléfono para crear enlace directo de WhatsApp o mostrar texto si es correo
         let soloDigitos = contacto.replace(/\D/g, '');
         let htmlContacto = soloDigitos.length >= 7 ? 
             `<a href="https://wa.me/${soloDigitos}" target="_blank" style="color:#00c851; text-decoration:none;"><i class="fab fa-whatsapp"></i> ${contacto}</a>` : 
@@ -65,12 +124,12 @@ function cargarYProcesarAuditoria() {
 
         const fila = document.createElement('tr');
         fila.innerHTML = `
-            <td><span class="badge-semaforo ${claseBadge}">${textoEstado}</span></td>
+            <td><span class="badge-semaforo ${claseBadge}">${textoEstadoTraducido}</span></td>
             <td style="font-weight:bold; color:#fff;">${nombre}</td>
             <td>${htmlContacto}</td>
             <td style="color:#00f0ff; font-weight:bold;">${asesor}</td>
             <td>${fecha}</td>
-            <td style="text-align:center; font-weight:bold; color:#ffbb33; font-size: 16px;">${intentos} veces</td>
+            <td style="text-align:center; font-weight:bold; color:#ffbb33; font-size: 16px;">${intentos} ${textoVeces}</td>
         `;
         tbody.appendChild(fila);
     });
@@ -86,6 +145,9 @@ function cargarRécordAsesores() {
     const key = 'AUDITORIA_COMPARTIDOS_ASESORES';
     let datosAsesores = JSON.parse(localStorage.getItem(key)) || {};
     
+    const lang = localStorage.getItem('sipv_lang_gerente') || 'es';
+    const textoEnvios = DICTIONARY[lang]?.gerente_texto_envios || "envíos";
+    
     ASESORES_AGENCIA.forEach((nombreAsesor, index) => {
         let idAsesorStr = String(index + 1);
         let total = 0;
@@ -97,7 +159,7 @@ function cargarRécordAsesores() {
         const fila = document.createElement('tr');
         fila.innerHTML = `
             <td style="font-weight:bold; color:#00f0ff;">${nombreAsesor} (ID: ${idAsesorStr})</td>
-            <td><span style="font-size: 16px; font-weight: bold; color: #00c851;">${total} envíos</span></td>
+            <td><span style="font-size: 16px; font-weight: bold; color: #00c851;">${total} ${textoEnvios}</span></td>
         `;
         tbodyAsesores.appendChild(fila);
     });
@@ -135,14 +197,27 @@ function actualizarIndicadoresKPI(t, v, a, r) {
 }
 
 function exportarAExcel() {
+    const lang = localStorage.getItem('sipv_lang_gerente') || 'es';
     const registros = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
-    if (registros.length === 0) { alert("No hay datos para exportar."); return; }
     
+    if (registros.length === 0) { 
+        const mensajeVacio = DICTIONARY[lang]?.alerta_excel_vacio || "No hay datos para exportar.";
+        alert(mensajeVacio); 
+        return; 
+    }
+    
+    const hCliente = DICTIONARY[lang]?.gerente_th_cliente || "Cliente";
+    const hContacto = DICTIONARY[lang]?.gerente_th_contacto || "Contacto";
+    const hAsesor = DICTIONARY[lang]?.gerente_th_asesor || "Asesor";
+    const hFecha = DICTIONARY[lang]?.gerente_th_fecha || "Primer Contacto";
+    const hIntentos = DICTIONARY[lang]?.gerente_th_intentos || "Intentos";
+    const hEstado = DICTIONARY[lang]?.gerente_th_estado || "Estado";
+
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-    csvContent += "Cliente,Contacto,Asesor,Primer Contacto,Intentos,Estado\n";
+    csvContent += `"${hCliente}","${hContacto}","${hAsesor}","${hFecha}","${hIntentos}","${hEstado}"\n`;
     
     registros.forEach((p) => {
-        csvContent += `"${p.nombre || ''}","${p.contacto || ''}","Asesor ID: ${p.asesor || ''}","${p.primerContacto || ''}","${p.intentos || 1}","${p.estado || ''}"\n`;
+        csvContent += `"${p.nombre || ''}","${p.contacto || ''}","${p.asesor || ''}","${p.primerContacto || ''}","${p.intentos || 1}","${p.estado || ''}"\n`;
     });
     
     const encodedUri = encodeURI(csvContent);
@@ -155,11 +230,15 @@ function exportarAExcel() {
 }
 
 function limpiarPanelGerencial() {
-    if (confirm("¿Estás seguro de vaciar el panel de auditoría por completo?")) {
+    const lang = localStorage.getItem('sipv_lang_gerente') || 'es';
+    const mensaje = DICTIONARY[lang].alerta_vaciar_panel || "¿Estás seguro de vaciar el panel de auditoría por completo?";
+    const mensajeExito = DICTIONARY[lang].alerta_panel_vaciado || "Panel vaciado correctamente.";
+    
+    if (confirm(mensaje)) {
         localStorage.removeItem('db_prospectos_agencia');
         localStorage.removeItem('AUDITORIA_COMPARTIDOS_ASESORES');
         localStorage.removeItem('historial_reseñas_cards');
-        alert("Panel vaciado correctamente.");
+        alert(mensajeExito);
         location.reload();
     }
 }

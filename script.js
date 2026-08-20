@@ -101,7 +101,8 @@ function renderGallery(cat) {
     
     const titleHeader = document.createElement('h2');
     titleHeader.className = 'gallery-title-white';
-    titleHeader.innerText = CONFIG.textos[cat].t;
+    titleHeader.setAttribute('data-i18n', `${cat}_t`);
+titleHeader.innerText = CONFIG.textos[cat].t;
     grid.appendChild(titleHeader);
     
     const imgCount = (cat === 'cat3') ? 4 : (cat === 'cat1' || cat === 'cat2') ? 6 : 4;
@@ -173,8 +174,21 @@ function changeLightboxImage(dir) {
 
 function openTextZoom(cat) {
     playClick();
-    document.getElementById('text-zoom-title').innerText = CONFIG.textos[cat].t;
-    document.getElementById('text-zoom-content').innerText = CONFIG.textos[cat].c;
+    const modalTitle = document.getElementById('text-zoom-title');
+    const modalContent = document.getElementById('text-zoom-content');
+    
+    // Conectamos con el sistema de idiomas
+    modalTitle.setAttribute('data-i18n', `${cat}_t`);
+    modalContent.setAttribute('data-i18n', `${cat}_c`);
+    
+    modalTitle.innerText = CONFIG.textos[cat].t;
+    modalContent.innerText = CONFIG.textos[cat].c;
+    
+    // Si tu sistema de idiomas tiene una función para refrescar, la llamamos aquí
+    if (typeof applyLanguage === 'function') {
+        applyLanguage();
+    }
+    
     document.getElementById('text-zoom-modal').style.display = 'flex';
 }
 
@@ -477,16 +491,17 @@ function validarPaso1YComenzar() {
 function guardarDatoPaso(pasoNum, campoKey, valorSeleccionado) {
     if (typeof playClick === 'function') playClick();
     
-    // Guardar el valor en nuestro objeto de auditoría
-    DATA_PROSPECTO[campoKey] = valorSeleccionado;
+    // Asegurarnos de guardar siempre el valor real en español sin importar el idioma visual
+    if (typeof DATA_PROSPECTO !== 'undefined') {
+        DATA_PROSPECTO[campoKey] = valorSeleccionado;
+    }
     
-    // Marcar visualmente el botón seleccionado en este paso específico
+    // Marcar visualmente el botón seleccionado de forma infalible usando el atributo data-val
     const contenedorPaso = document.getElementById(`paso-${pasoNum}`);
     if (contenedorPaso) {
         contenedorPaso.querySelectorAll('.btn-opcion-q').forEach(btn => {
-            const clickAttr = btn.getAttribute('onclick');
-            if (btn.innerText.trim().toLowerCase() === valorSeleccionado.toLowerCase() || 
-                (clickAttr && clickAttr.includes(`'${valorSeleccionado}'`))) {
+            const valAttr = btn.getAttribute('data-val');
+            if (valAttr && valAttr.toLowerCase() === valorSeleccionado.toLowerCase()) {
                 btn.classList.add('active-q');
             } else {
                 btn.classList.remove('active-q');
@@ -495,16 +510,19 @@ function guardarDatoPaso(pasoNum, campoKey, valorSeleccionado) {
     }
 
     // Avanzar automáticamente o mostrar asesores si es el último paso
-    if (pasoActualCuestionario < TOTAL_PASOS_CUESTIONARIO) {
-        if (typeof cambiarPasoCuestionario === 'function') {
-            cambiarPasoCuestionario(1);
-        }
-    } else {
-        if (typeof finalizarCuestionarioYMostrarAsesores === 'function') {
-            finalizarCuestionarioYMostrarAsesores();
+    if (typeof pasoActualCuestionario !== 'undefined' && typeof TOTAL_PASOS_CUESTIONARIO !== 'undefined') {
+        if (pasoActualCuestionario < TOTAL_PASOS_CUESTIONARIO) {
+            if (typeof cambiarPasoCuestionario === 'function') {
+                cambiarPasoCuestionario(1);
+            }
+        } else {
+            if (typeof finalizarCuestionarioYMostrarAsesores === 'function') {
+                finalizarCuestionarioYMostrarAsesores();
+            }
         }
     }
 }
+
 
 /**
  * Controla la navegación general (Adelante / Atrás) y actualiza la barra de progreso
@@ -571,35 +589,38 @@ function finalizarCuestionarioYMostrarAsesores() {
     
     DATA_PROSPECTO.fecha_registro = new Date().toLocaleString();
     
-    DATA_PROSPECTO.nombre = document.getElementById('q-nombre')?.value || DATA_PROSPECTO.nombre;
-    DATA_PROSPECTO.whatsapp = document.getElementById('q-whatsapp')?.value || DATA_PROSPECTO.whatsapp;
+    // Aseguramos capturar todos los valores
+    DATA_PROSPECTO.nombre = document.getElementById('q-nombre')?.value || DATA_PROSPECTO.nombre || "Sin nombre";
+    DATA_PROSPECTO.whatsapp = document.getElementById('q-whatsapp')?.value || DATA_PROSPECTO.whatsapp || "No reg.";
     DATA_PROSPECTO.modelo = document.getElementById('modelo')?.value || DATA_PROSPECTO.modelo;
     DATA_PROSPECTO.uso = document.getElementById('uso')?.value || DATA_PROSPECTO.uso;
     
-    // Semáforo
+    // --- LÓGICA DE SEMÁFORO MEJORADA ---
     let t = (DATA_PROSPECTO.tiempo || "").toString().toLowerCase();
+    
     if (t.includes("semana") || t.includes("mes")) {
         DATA_PROSPECTO.semaforo = "Verde";
-    } else if (t.includes("3 meses")) {
+    } else if (t.includes("3 meses") || t.includes("6 meses")) {
         DATA_PROSPECTO.semaforo = "Amarillo";
     } else {
         DATA_PROSPECTO.semaforo = "Rojo";
     }
 
     let asesorSelect = document.getElementById('asesor-selector');
-    DATA_PROSPECTO.asesor = (asesorSelect && asesorSelect.value) ? asesorSelect.value : (DATA_PROSPECTO.asesor || "ASESOR 1");
+    DATA_PROSPECTO.asesor = (asesorSelect && asesorSelect.value) ? asesorSelect.value : (DATA_PROSPECTO.asesor || "1");
     
-    // Guardar para el Gerente
+    // --- GUARDADO CORREGIDO PARA EL GERENTE ---
     try {
         let registrosExistentes = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
         
         let prospectoParaGerente = {
-            nombre: DATA_PROSPECTO.nombre || "Sin nombre",
-            contacto: DATA_PROSPECTO.whatsapp || "No reg.",
-            asesor: (DATA_PROSPECTO.asesor || "1").replace(/\D/g, '') || "1",
+            nombre: DATA_PROSPECTO.nombre,
+            contacto: DATA_PROSPECTO.whatsapp,
+            asesor: DATA_PROSPECTO.asesor.toString().replace(/\D/g, ''),
             primerContacto: DATA_PROSPECTO.fecha_registro,
             intentos: 1,
-            estado: DATA_PROSPECTO.semaforo
+            estado: DATA_PROSPECTO.semaforo,
+            tiempo: DATA_PROSPECTO.tiempo || "No especificado" // <--- ¡AQUÍ ESTABA EL OLVIDO!
         };
 
         registrosExistentes.push(prospectoParaGerente);
@@ -611,7 +632,7 @@ function finalizarCuestionarioYMostrarAsesores() {
     let modalCuestionario = document.getElementById('cuestionario-modal');
     if(modalCuestionario) modalCuestionario.style.display = 'none';
     
-    alert("¡Muchas gracias! Tus datos han sido procesados de forma segura. Ahora puedes seleccionar a tu asesor especializado.");
+    alert("¡Muchas gracias! Tus datos han sido procesados. Ahora puedes seleccionar a tu asesor.");
     
     if (typeof abrirMenu === 'function') {
         abrirMenu();
@@ -800,4 +821,226 @@ function guardarReseñaEnPanel(numAsesor, key) {
     
     alert('¡Calificación guardada con éxito para el panel gerencial!');
     cerrarMenuReseñas();
+}
+
+// ==========================================
+// CONVERSOR AUTOMÁTICO A USD (PASO 7)
+// ==========================================
+const CONFIG_MONEDA = {
+    tasaCambioUSD: 18.5 // <--- CAMBIA ESTE NÚMERO SEGÚN EL PAÍS (Ej. México 18.5, Colombia 4000, etc.)
+};
+
+function calcularPresupuestoUSD() {
+    const botones = document.querySelectorAll('#paso-7 .btn-opcion-q');
+    
+    botones.forEach(btn => {
+        const tipo = btn.getAttribute('data-tipo');
+        if (!tipo) return; // Salta el botón de "Prefiero no decirlo"
+        
+        let textoOriginal = btn.innerHTML.split('<span')[0].trim();
+
+        if (tipo === 'menor') {
+            const val = parseFloat(btn.getAttribute('data-valor'));
+            const usd = Math.round(val / CONFIG_MONEDA.tasaCambioUSD);
+            btn.innerHTML = `${textoOriginal} <span style="color: #D4AF37; font-size: 0.9em;">(aprox. $${usd.toLocaleString()} USD)</span>`;
+        } 
+        else if (tipo === 'rango') {
+            const min = parseFloat(btn.getAttribute('data-valor-min'));
+            const max = parseFloat(btn.getAttribute('data-valor-max'));
+            const usdMin = Math.round(min / CONFIG_MONEDA.tasaCambioUSD);
+            const usdMax = Math.round(max / CONFIG_MONEDA.tasaCambioUSD);
+            btn.innerHTML = `${textoOriginal} <span style="color: #D4AF37; font-size: 0.9em;">(aprox. $${usdMin.toLocaleString()} - $${usdMax.toLocaleString()} USD)</span>`;
+        }
+        else if (tipo === 'mayor') {
+            const val = parseFloat(btn.getAttribute('data-valor'));
+            const usd = Math.round(val / CONFIG_MONEDA.tasaCambioUSD);
+            btn.innerHTML = `${textoOriginal} <span style="color: #D4AF37; font-size: 0.9em;">(aprox. +$${usd.toLocaleString()} USD)</span>`;
+        }
+    });
+}
+
+// Se ejecuta solo en automático al cargar la página
+window.addEventListener('load', () => {
+    calcularPresupuestoUSD();
+});
+
+// ==========================================
+// CONTROL DEL CATÁLOGO Y ASESORES SIPVEC (MULTILINGÜE)
+// ==========================================
+
+function abrirCatalogoMaestro() {
+    const modal = document.getElementById('modal-catalogo-maestro');
+    if (modal) {
+        modal.style.display = 'flex';
+        const visor = document.getElementById('visor-dinamico-catalogo');
+        if (visor) visor.innerHTML = '';
+    }
+}
+
+function cerrarCatalogoMaestro() {
+    const modal = document.getElementById('modal-catalogo-maestro');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Bucle rotativo equitativo de asesores
+function obtenerAsesorRotativoCatalogo() {
+    const asesores = [
+        { nombre: "Lic. Carlos Mendoza", tel: "5214491472336", id: "1" },
+        { nombre: "Ing. Sofía Valdés", tel: "5214491472336", id: "2" },
+        { nombre: "Lic. Alejandro Garza", tel: "5214491472336", id: "3" }
+    ];
+    
+    let indiceActual = parseInt(sessionStorage.getItem('sipv_asesor_idx') || '0');
+    const asesorAsignado = asesores[indiceActual];
+    
+    indiceActual = (indiceActual + 1) % asesores.length;
+    sessionStorage.setItem('sipv_asesor_idx', indiceActual.toString());
+
+    return asesorAsignado;
+}
+
+// Registro automático en el panel de gerencia y apertura de WhatsApp (Semáforo Verde y Asesor Visible)
+function procesarInteresCatalogo(tipo, nombreItem) {
+    const asesorEnTurno = obtenerAsesorRotativoCatalogo();
+    const fechaHora = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString();
+
+    try {
+        let registrosExistentes = JSON.parse(localStorage.getItem('db_prospectos_agencia')) || [];
+        
+        let prospectoParaGerente = {
+            nombre: `Prospecto Web (${tipo})`,
+            contacto: "Vía WhatsApp Directo",
+            asesor: asesorEnTurno.nombre,
+            primerContacto: fechaHora,
+            intentos: 1,
+            estado: "Verde",
+            tiempo: `Solicitó: ${nombreItem}`
+        };
+
+        registrosExistentes.push(prospectoParaGerente);
+        localStorage.setItem('db_prospectos_agencia', JSON.stringify(registrosExistentes));
+    } catch (e) {
+        console.error("Error al registrar lead en gerencia:", e);
+    }
+
+    let mensaje = tipo === 'Auto' 
+        ? `Hola ${asesorEnTurno.nombre}, me interesa el modelo *${nombreItem}* visto en la CARD. ¿Me podrías brindar más información y disponibilidad?`
+        : `Hola ${asesorEnTurno.nombre}, me interesa solicitar presupuesto para el servicio: *${nombreItem}*. ¿Me podrías asesorar?`;
+
+    const urlWa = `https://wa.me/${asesorEnTurno.tel}?text=${encodeURIComponent(mensaje)}`;
+    window.open(urlWa, '_blank');
+}
+
+// Renderizado de las secciones con soporte multilingüe integrado
+function cargarSeccionCatalogo(seccion) {
+    const visor = document.getElementById('visor-dinamico-catalogo');
+    if (!visor) return;
+    
+    visor.innerHTML = '';
+    const tasa = (typeof CONFIG_MONEDA !== 'undefined' && CONFIG_MONEDA.tasaCambioUSD) ? CONFIG_MONEDA.tasaCambioUSD : 18.5;
+
+    // Obtención del idioma activo para los textos dinámicos
+    const lang = localStorage.getItem('sipv_lang') || 'es';
+    const textosDinamicos = {
+        es: { interes: "Me interesa", comentanos: "Coméntanos", descServ: "Atención personalizada y especializada." },
+        en: { interes: "I'm interested", comentanos: "Contact us", descServ: "Personalized and specialized attention." },
+        pt: { interes: "Tenho interesse", comentanos: "Fale conosco", descServ: "Atendimento personalizado e especializado." },
+        fr: { interes: "Ça m'intéresse", comentanos: "Contactez-nous", descServ: "Attention personnalisée et spécialisée." },
+        ko: { interes: "관심 있습니다", comentanos: "문의하기", descServ: "맞춤형 전문 상담." },
+        ja: { interes: "興味があります", comentanos: "お問い合わせ", descServ: "パーソナライズされた専門的な対応。" },
+        de: { interes: "Das interessiert mich", comentanos: "Kontaktieren Sie uns", descServ: "Persönliche und fachkundige Betreuung." },
+        zh: { interes: "我感兴趣", comentanos: "联系我们", descServ: "个性化专业服务。" }
+    };
+    const t = textosDinamicos[lang] || textosDinamicos['es'];
+
+    const grid = document.createElement('div');
+    grid.className = 'carousel-zigzag-grid';
+    
+    if (seccion === 'autos') {
+        grid.style.cssText = "display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px;";
+        
+        const autos = [
+            { id: 1, nom: "Zenith Sport GT", precio: 450000 },
+            { id: 2, nom: "Familiar Cross Plus", precio: 380000 },
+            { id: 3, nom: "Ejecutivo Elite", precio: 520000 },
+            { id: 4, nom: "Utilitario Cargo Pro", precio: 290000 },
+            { id: 5, nom: "Premium Sportback", precio: 550000 },
+            { id: 6, nom: "Edición Limitada 2026", precio: 495000 }
+        ];
+
+        autos.forEach(auto => {
+            const usd = Math.round(auto.precio / tasa);
+            const tarjeta = document.createElement('div');
+            tarjeta.style = "background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 10px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;";
+            tarjeta.innerHTML = `
+                <div>
+                    <div style="overflow: hidden; border-radius: 6px; margin-bottom: 8px; background: #000;">
+                        <img src="assets/productos/${auto.id}.jpg" style="width: 100%; height: 110px; object-fit: cover; cursor: pointer; transition: transform 0.3s;" onclick="abrirZoomCatalogo(this.src)" alt="${auto.nom}" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    </div>
+                    <h4 style="color: #fff; margin: 0 0 4px 0; font-size: 0.85rem; font-weight: 700;">${auto.nom}</h4>
+                    <p style="color: #D4AF37; font-size: 0.95rem; font-weight: 800; margin: 0 0 2px 0;">$${auto.precio.toLocaleString()} MXN</p>
+                    <p style="font-size: 0.7rem; color: #aaa; margin: 0 0 8px 0;">($${usd.toLocaleString()} USD)</p>
+                </div>
+                <button type="button" class="btn-network-link" onclick="procesarInteresCatalogo('Auto', '${auto.nom}')" style="padding: 6px; font-size: 0.75rem; justify-content: center; width: 100%;">
+                    <span>${t.interes}</span>
+                </button>
+            `;
+            grid.appendChild(tarjeta);
+        });
+
+    } else {
+        grid.style.cssText = "display: flex; flex-direction: column; gap: 12px; margin-top: 10px;";
+        
+        const servicios = [
+            { id: 7, nom: "Mantenimiento Preventivo y Mayor" },
+            { id: 8, nom: "Diagnóstico y Electrónica Avanzada" },
+            { id: 9, nom: "Estética y Detallado Automotriz" }
+        ];
+
+        servicios.forEach(serv => {
+            const tarjeta = document.createElement('div');
+            tarjeta.style = "background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px;";
+            tarjeta.innerHTML = `
+                <div style="width: 90px; height: 75px; flex-shrink: 0; overflow: hidden; border-radius: 6px; background: #000;">
+                    <img src="assets/productos/${serv.id}.jpg" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="abrirZoomCatalogo(this.src)" alt="${serv.nom}">
+                </div>
+                <div style="flex-grow: 1; text-align: left;">
+                    <h4 style="color: #fff; margin: 0 0 4px 0; font-size: 0.85rem; font-weight: 700;">${serv.nom}</h4>
+                    <p style="font-size: 0.7rem; color: #ccc; margin: 0 0 8px 0; line-height: 1.2;">${t.descServ}</p>
+                    <button type="button" class="btn-network-link" onclick="procesarInteresCatalogo('Servicio', '${serv.nom}')" style="padding: 5px 10px; font-size: 0.75rem; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); border: none;">
+                        <span><i class="fab fa-whatsapp"></i> ${t.comentanos}</span>
+                    </button>
+                </div>
+            `;
+            grid.appendChild(tarjeta);
+        });
+    }
+
+    visor.appendChild(grid);
+    grid.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Zoom Fotográfico profesional equipado con tu botón de cierre circular elegante
+function abrirZoomCatalogo(src) {
+    const modal = document.createElement('div');
+    modal.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.96); z-index:99999; display:flex; justify-content:center; align-items:center;";
+    
+    const contenido = document.createElement('div');
+    contenido.style = "position: relative; max-width: 92%; max-height: 92%; display: flex; justify-content: center; align-items: center;";
+    
+    contenido.innerHTML = `
+        <button class="btn-close-circular" onclick="this.closest('#modal-zoom-temp').remove()" style="position: absolute; top: -15px; right: -15px; z-index: 100000;">×</button>
+        <img src="${src}" style="max-width: 100%; max-height: 85vh; border-radius: 10px; border: 2px solid #D4AF37; box-shadow: 0 0 30px rgba(212,175,55,0.4);">
+    `;
+    
+    modal.id = 'modal-zoom-temp';
+    modal.appendChild(contenido);
+    
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+    };
+    
+    document.body.appendChild(modal);
 }
