@@ -977,7 +977,7 @@ function cargarSeccionCatalogo(seccion) {
             tarjeta.innerHTML = `
                 <div>
                     <div style="overflow: hidden; border-radius: 6px; margin-bottom: 8px; background: #000;">
-                        <img src="assets/productos/${auto.id}.jpg" style="width: 100%; height: 110px; object-fit: cover; cursor: pointer; transition: transform 0.3s;" onclick="abrirZoomCatalogo(this.src)" alt="${auto.nom}" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="assets/Productos/${auto.id}.jpg" style="width: 100%; height: 110px; object-fit: cover; cursor: pointer; transition: transform 0.3s;" onclick="abrirZoomCatalogo(this.src)" alt="${auto.nom}" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     </div>
                     <h4 style="color: #fff; margin: 0 0 4px 0; font-size: 0.85rem; font-weight: 700;">${auto.nom}</h4>
                     <p style="color: #D4AF37; font-size: 0.95rem; font-weight: 800; margin: 0 0 2px 0;">$${auto.precio.toLocaleString()} MXN</p>
