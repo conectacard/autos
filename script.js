@@ -1004,7 +1004,7 @@ function cargarSeccionCatalogo(seccion) {
             tarjeta.style = "background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px;";
             tarjeta.innerHTML = `
                 <div style="width: 90px; height: 75px; flex-shrink: 0; overflow: hidden; border-radius: 6px; background: #000;">
-                    <img src="assets/productos/${serv.id}.jpg" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="abrirZoomCatalogo(this.src)" alt="${serv.nom}">
+                    <img src="assets/Productos/${serv.id}.jpg" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="abrirZoomCatalogo(this.src)" alt="${serv.nom}">
                 </div>
                 <div style="flex-grow: 1; text-align: left;">
                     <h4 style="color: #fff; margin: 0 0 4px 0; font-size: 0.85rem; font-weight: 700;">${serv.nom}</h4>
