@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Comando Comercial | SIPVEC Elite</title>
+    <!-- Fuentes de Google de alta gama -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="asesor-style.css">
+    <!-- Librería externa ligera para renderizar códigos QR limpios y profesionales -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="sipv-dashboard-body">
+
+    <!-- HEADER EJECUTIVO -->
+    <header class="sipv-header">
+        <div class="sipv-header-content">
+            <div class="brand-badge">SIPVEC ELITE OS</div>
+            <h1>Centro de Comando Comercial</h1>
+            <p>Acelera tus cierres, activa recursos y domina tu territorio</p>
+        </div>
+        
+        <!-- TARJETA DE ESTADO Y GUÍA PARA EL ASESOR -->
+<div class="user-status-card" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px dashed rgba(37, 211, 102, 0.4);">
+    <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+        <span class="status-dot"></span>
+        <div>
+            <small style="color: #aaa;">Asesor Activo en URL</small>
+            <strong id="badge-nombre-asesor" style="color: #25D366; font-size: 15px;">GENERAL</strong>
+        </div>
+    </div>
+    
+    <!-- Instrucción literal para el asesor -->
+    <div style="font-size: 11px; color: #ddd; line-height: 1.3; border-top: 1px solid rgba(255,255,255,0.1); pt-2; margin-top: 2px;">
+        💡 <strong>Para personalizar:</strong> Modifica la barra de tu navegador cambiando <span style="color: #ff9800; font-weight: bold;">?asesor=general</span> por tu nombre (ej: <span style="color: #25D366; font-weight: bold;">?asesor=carlos</span>) y presiona Enter.
+    </div>
+</div>
+</header>
+
+    <main class="sipv-main-grid">
+
+        <!-- TARJETA PRINCIPAL: ACCESO A LA MATRIZ -->
+        <section class="sipv-card hero-card">
+            <div class="hero-info">
+                <span class="badge-gold">Plataforma Central</span>
+                <h2>Tu SIPVEC CARD Oficial</h2>
+                <p>El núcleo de conversión definitivo para enviar fichas, catálogos y agendar citas al instante.</p>
+            </div>
+            <a href="https://demo-autos.pideya.contact/" target="_blank" class="sipv-btn btn-glow">
+                🚀 Abrir SIPVEC CARD
+            </a>
+        </section>
+
+        <!-- SECCIÓN 1: HUB SOCIAL, JUEGOS Y ENTRETENIMIENTO (Atracción Masiva) -->
+        <section class="sipv-card module-section" id="social-module">
+            <div class="section-title">
+                <span class="icon">🎮</span>
+                <div>
+                    <h3>Hub de Entretenimiento & Social Selling</h3>
+                    <small>Juegos, tarjetas de cortesía y experiencias con tu branding listas para compartir</small>
+                </div>
+            </div>
+            <div class="action-grid">
+                
+                <!-- Botón Activador del Panel de Juegos -->
+                <button class="resource-card-btn" onclick="togglePanelJuegos()">
+                    <span class="card-icon">🎯</span>
+                    <strong>Juegos con Branding de la empresa</strong>
+                    <small>Minijuegos interactivos (Solitario, Memorama, Calendario, Gato) con tu identidad y enlace.</small>
+                </button>
+
+                <!-- Panel Desplegable de Juegos -->
+                <div id="panel-juegos-desplegable" style="display: none; grid-column: 1 / -1; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 18px; margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <h4 style="color: #fff; margin: 0; font-size: 15px;">🎮 Panel de Juegos ZENITH CAR</h4>
+                        <button onclick="togglePanelJuegos()" style="background: transparent; border: none; color: #aaa; cursor: pointer; font-size: 16px;">✕ Cerrar</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div><span style="font-size: 20px;">🃏</span><strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">Solitario VIP</strong><small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Cartas y estilo ZENITH CAR.</small></div>
+                            <div style="display: flex; gap: 6px;"><button onclick="probarJuego('solitario')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer;">🔍 Probar</button><button onclick="compartirJuego('solitario')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📤 Enviar</button></div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div><span style="font-size: 20px;">🧩</span><strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">Memorama Automotriz</strong><small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Dinámica de memoria visual.</small></div>
+                            <div style="display: flex; gap: 6px;"><button onclick="probarJuego('memorama')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer;">🔍 Probar</button><button onclick="compartirJuego('memorama')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📤 Enviar</button></div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div><span style="font-size: 20px;">📅</span><strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">Calendario de Ofertas</strong><small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Fechas clave y promociones.</small></div>
+                            <div style="display: flex; gap: 6px;"><button onclick="probarJuego('calendario')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer;">🔍 Probar</button><button onclick="compartirJuego('calendario')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📤 Enviar</button></div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div><span style="font-size: 20px;">❌</span><strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">Tres en Raya (Gato)</strong><small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Duelo rápido y casual.</small></div>
+                            <div style="display: flex; gap: 6px;"><button onclick="probarJuego('gato')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer;">🔍 Probar</button><button onclick="compartirJuego('gato')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📤 Enviar</button></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón Activador del Panel de Saludos y Multimedia -->
+                <button class="resource-card-btn" onclick="togglePanelSaludos()">
+                    <span class="card-icon">✨</span>
+                    <strong>Saludos al Prospecto y Cliente</strong>
+                    <small>Videos cortos de felicitación a sectores especificos (Bombero, Doctor, Maestra) listos para compartir.</small>
+                </button>
+
+                <!-- PANEL DESPLEGABLE DE SALUDOS Y MULTIMEDIA -->
+                <div id="panel-saludos-desplegable" style="display: none; grid-column: 1 / -1; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 18px; margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <h4 style="color: #fff; margin: 0; font-size: 15px;">✨ Saludos, Flyers & Videos (ZENITH CAR)</h4>
+                        <button onclick="togglePanelSaludos()" style="background: transparent; border: none; color: #aaa; cursor: pointer; font-size: 16px;">✕ Cerrar</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                        
+                        <!-- VIDEO SHORT -->
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 20px;">🎬</span>
+                                <strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">Video Short Especial</strong>
+                                <small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Video musical dedicado de YouTube.</small>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="probarMultimedia('video-short')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer;">🔍 Ver</button>
+                                <button onclick="compartirMultimedia('video-short')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📤 Enviar</button>
+                            </div>
+                        </div>
+
+                        <!-- VIDEO PANADEROS -->
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 20px;">🥖</span>
+                                <strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">Panaderos</strong>
+                                <small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Video saludo comercial.</small>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="probarMultimedia('panaderos')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer;">🔍 Ver</button>
+                                <button onclick="compartirMultimedia('panaderos')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📤 Enviar</button>
+                            </div>
+                        </div>
+
+                        <!-- VIDEO DENTISTAS -->
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 20px;">🦷</span>
+                                <strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">Dentistas</strong>
+                                <small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Video saludo comercial.</small>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="probarMultimedia('dentistas')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer;">🔍 Ver</button>
+                                <button onclick="compartirMultimedia('dentistas')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📤 Enviar</button>
+                            </div>
+                        </div>
+
+                        <!-- VIDEO PSICÓLOGOS -->
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 20px;">🧠</span>
+                                <strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">Psicólogos</strong>
+                                <small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Video saludo comercial.</small>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="probarMultimedia('psicologos')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; cursor: pointer;">🔍 Ver</button>
+                                <button onclick="compartirMultimedia('psicologos')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📤 Enviar</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: MÓDULO INSTITUCIONAL Y CAMPO B2B -->
+        <section class="sipv-card module-section" id="b2b-module">
+            <div class="section-title">
+                <span class="icon">💼</span>
+                <div>
+                    <h3>Maletín Institucional & Campo</h3>
+                    <small>Herramientas tácticas para reuniones y llamadas directas</small>
+                </div>
+            </div>
+            <div class="action-grid">
+                
+                <!-- Botón Activador del Panel de Guiones Ejecutivos -->
+                <button class="resource-card-btn" onclick="togglePanelGuiones()">
+                    <span class="card-icon">📞</span>
+                    <strong>Guiones Ejecutivos</strong>
+                    <small>Estrategias probadas de llamada y mensajes listos para copiar</small>
+                </button>
+
+                <!-- Panel Desplegable de Guiones -->
+                <div id="panel-guiones-desplegable" style="display: none; grid-column: 1 / -1; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 18px; margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <h4 style="color: #fff; margin: 0; font-size: 15px;">📞 Guiones de Conversión Comercial</h4>
+                        <button onclick="togglePanelGuiones()" style="background: transparent; border: none; color: #aaa; cursor: pointer; font-size: 16px;">✕ Cerrar</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                        
+                        <!-- GUION 1: ROMPEHIELOS -->
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 20px;">👋</span>
+                                <strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">1. El Rompehielos</strong>
+                                <small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Para saludar en frío o reactivar chat.</small>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="copiarGuion('rompehielos')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📋 Copiar Guion</button>
+                            </div>
+                        </div>
+
+                        <!-- GUION 2: SEGUIMIENTO / CIERRE -->
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 20px;">🎯</span>
+                                <strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">2. Cierre de Cita</strong>
+                                <small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Para clientes indecisos en visto.</small>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="copiarGuion('seguimiento')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📋 Copiar Guion</button>
+                            </div>
+                        </div>
+
+                        <!-- GUION 3: MANEJO DE PRECIO -->
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 20px;">💡</span>
+                                <strong style="color: #fff; display: block; margin: 6px 0 2px 0; font-size: 14px;">3. Objeción de Precio</strong>
+                                <small style="color: #bbb; font-size: 12px; display: block; margin-bottom: 10px;">Redirige el enfoque al valor.</small>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="copiarGuion('precio')" class="sipv-btn" style="flex: 1; padding: 6px; font-size: 11px; background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📋 Copiar Guion</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Botón de Generador QR Visita Optimizado -->
+                <button class="resource-card-btn" onclick="lanzarRecurso('qr-dinamico')">
+                    <span class="card-icon">🖨️</span>
+                    <strong>Generador QR Visita</strong>
+                    <small>Muestra tu código de presencia en tiempo real</small>
+                </button>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: ACADEMIA Y MOTIVACIÓN GERENCIAL -->
+        <section class="sipv-card module-section gerencia-box">
+            <div class="section-title">
+                <span class="icon">🎓</span>
+                <div>
+                    <h3>Kit de Respaldos Gerenciales</h3>
+                    <small>Estrategia y energía diaria enviada por la gerencia</small>
+                </div>
+            </div>
+            <!-- Enlace directo para abrir el video estratégico -->
+            <a href="https://www.youtube.com/watch?v=kNSc3dXlV34" target="_blank" style="text-decoration: none; display: block;">
+                <div class="video-preview-card" style="cursor: pointer; transition: transform 0.2s ease;">
+                    <div class="video-placeholder" style="background: linear-gradient(135deg, #111, #222); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 20px; text-align: center; color: #fff;">
+                        <span style="font-size: 16px; font-weight: bold;">▶ Ver Video Estratégico Quincenal</span>
+                    </div>
+                    <p style="color: #ccc; margin-top: 8px; font-size: 13px;"><em>"Mi mantra para "sentir ganas" de hacer lo que me propongo"</em> - Dan Macías</p>
+                </div>
+            </a>
+        </section>
+
+    </main>
+
+    <!-- FOOTER TÉCNICO -->
+    <footer class="sipv-footer">
+        <p>Operado con Arquitectura de Inteligencia Comercial y Estándar SIPVEC &copy; 2026</p>
+    </footer>
+
+    <!-- MODAL DINÁMICO PARA EL CÓDIGO QR AUTOMÁTICO DEL ASESOR -->
+    <div id="sipv-qr-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+        <div style="background:#18181b; border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:30px; max-width:360px; width:90%; text-align:center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="color:#fff; margin:0; font-size:18px;">📱 Tu QR de Presencia</h3>
+                <button onclick="cerrarQRModal()" style="background:transparent; border:none; color:#aaa; font-size:18px; cursor:pointer;">✕</button>
+            </div>
+            <p id="sipv-qr-subtitle" style="color:#a1a1aa; font-size:13px; margin-bottom:20px;">Código vinculado a tu ID de ventas oficial.</p>
+            
+            <!-- Contenedor donde se dibuja el QR -->
+            <div id="sipv-qrcode-render" style="background:#fff; padding:15px; border-radius:12px; display:inline-block; margin-bottom:20px;"></div>
+            
+            <div style="word-break:break-all; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:11px; color:#e4e4e7; margin-bottom:20px;" id="sipv-qr-url-text"></div>
+            
+            <div style="display:flex; gap:10px;">
+                <button onclick="copiarEnlaceQR()" class="sipv-btn" style="flex:1; padding:10px; background:#25D366; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:13px;">📋 Copiar Enlace</button>
+                <button onclick="cerrarQRModal()" class="sipv-btn" style="flex:1; padding:10px; background:#27272a; color:#fff; border:1px solid #3f3f46; border-radius:8px; cursor:pointer; font-size:13px;">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core de interacción del asesor -->
+    <script src="asesor-core.js"></script>
+</body>
+</html>

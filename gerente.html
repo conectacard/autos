@@ -100,9 +100,25 @@
                 </div>
             </div>
 
+            <!-- RESUMEN EJECUTIVO DE RECURSOS DE APOYO (Ligero y sin saturación) -->
+            <div style="background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <span style="color: #aaa; font-size: 12px; display: block;">🎮 Uso de Juegos Branding</span>
+                    <strong id="stat-fuente-juegos" style="font-size: 18px; color: #00f0ff;">0</strong>
+                </div>
+                <div style="border-left: 1px solid #333; padding-left: 15px;">
+                    <span style="color: #aaa; font-size: 12px; display: block;">✨ Saludos y Redes</span>
+                    <strong id="stat-fuente-saludos" style="font-size: 18px; color: #ffbb33;">0</strong>
+                </div>
+                <div style="border-left: 1px solid #333; padding-left: 15px;">
+                    <span style="color: #aaa; font-size: 12px; display: block;">📱 QR Presencial / Campo</span>
+                    <strong id="stat-fuente-qr" style="font-size: 18px; color: #00c851;">0</strong>
+                </div>
+            </div>
+
             <h2 data-i18n="gerente_seccion_estatus" style="text-align: left; font-size: 18px; margin-bottom: 15px;">Estatus de Maduración del Cliente</h2>
 
-            <<!-- BARRA DE ACCIONES CON BOTONES NUEVOS -->
+            <!-- BARRA DE ACCIONES CON BOTONES -->
             <div class="action-bar">
                 <button onclick="exportarAExcel()" class="btn btn-excel">
                     <i class="fas fa-file-excel"></i> <span data-i18n="gerente_btn_excel">Descargar Excel (CSV)</span>
@@ -147,7 +163,7 @@
                 </table>
             </div>
 
-            <!-- SECCIÓN NUEVA: RESEÑAS Y EVALUACIONES CONFIDENCIALES DE ASESORES -->
+            <!-- SECCIÓN: RESEÑAS Y EVALUACIONES CONFIDENCIALES DE ASESORES -->
             <h2 data-i18n="gerente_seccion_reseñas" style="text-align: left; font-size: 18px; margin: 30px 0 15px 0;">Evaluaciones Confidenciales y Reseñas de Asesores</h2>
             <div class="table-responsive">
                 <table>
