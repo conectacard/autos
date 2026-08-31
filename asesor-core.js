@@ -1,11 +1,89 @@
 /**
  * Core de Interacción y Seguimiento - Asesor SIPVEC Elite (ZENITH CAR)
- * Versión Directa con Guía Visual para el Asesor.
+ * Versión Directa con Guía Visual y Soporte i18n Integrado en Alertas y Mensajes.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
+    inicializarIdioma();
     inicializarAsesorDirecto();
 });
+
+/**
+ * Sistema i18n: Inicializa y traduce la interfaz al cargar
+ */
+function inicializarIdioma() {
+    const idiomaGuardado = localStorage.getItem('sipv_lang') || 'es';
+    aplicarTraducciones(idiomaGuardado);
+}
+
+/**
+ * Cambia el idioma en tiempo real y lo guarda en localStorage
+ */
+function cambiarIdioma(lang) {
+    if (window.translations && translations[lang]) {
+        localStorage.setItem('sipv_lang', lang);
+        aplicarTraducciones(lang);
+    }
+}
+
+/**
+ * Obtiene el texto traducido según el idioma actual (para alertas y mensajes dinámicos)
+ */
+function obtenerTextoIdioma(key, replacements = {}) {
+    // Usar la misma llave de almacenamiento que usa tu asesor-lang.js
+    const lang = localStorage.getItem('sipv_lang_asesor') || localStorage.getItem('sipv_lang') || 'es';
+    
+    let text = key;
+    
+    // Buscar directamente en el DICTIONARY que maneja tu asesor-lang.js
+    if (typeof DICTIONARY !== 'undefined') {
+        if (DICTIONARY[lang] && DICTIONARY[lang][key]) {
+            text = DICTIONARY[lang][key];
+        } else if (DICTIONARY['es'] && DICTIONARY['es'][key]) {
+            // Respaldo en español si no existe en el idioma elegido
+            text = DICTIONARY['es'][key];
+        }
+    }
+    
+    // Reemplazar variables dinámicas si las hay (ej: {etiqueta}, {asesorId})
+    Object.keys(replacements).forEach(placeholder => {
+        text = text.replace(new RegExp(`{${placeholder}}`, 'g'), replacements[placeholder]);
+    });
+    
+    return text;
+}
+
+/**
+ * Recorre el DOM buscando elementos con data-i18n y actualiza su texto o placeholders
+ */
+function aplicarTraducciones(lang) {
+    if (!window.translations) return;
+    const dict = translations[lang];
+    if (!dict) return;
+
+    // Traducir título de la página
+    if (dict.page_title) {
+        document.title = dict.page_title;
+    }
+
+    // Traducir elementos con atributo data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(elemento => {
+        const key = elemento.getAttribute('data-i18n');
+        if (dict[key]) {
+            if (elemento.tagName === 'INPUT' || elemento.tagName === 'TEXTAREA') {
+                elemento.placeholder = dict[key];
+            } else {
+                elemento.innerHTML = dict[key];
+            }
+        }
+    });
+
+    // Actualizar selectores visuales de idioma si existen en tu HTML
+    const lblIdioma = document.getElementById('lbl-idioma-activo');
+    if (lblIdioma && dict.lbl_idioma) {
+        lblIdioma.textContent = dict.lbl_idioma;
+    }
+}
 
 /**
  * Lee el asesor de la URL y valida si es necesario mostrar una alerta visual
@@ -110,7 +188,7 @@ function compartirJuego(juego) {
     const asesorId = obtenerAsesorActual();
     
     if (asesorId === 'general') {
-        alert("⚠️ ATENCIÓN: Estás usando el enlace genérico.\n\nRecuerda escribir tu nombre en la barra del navegador (ej: ?asesor=tu_nombre) antes de compartir.");
+        alert(obtenerTextoIdioma('alerta_generico_juego'));
     }
 
     const dominiosJuegos = {
@@ -154,7 +232,7 @@ function compartirMultimedia(tipo) {
     const asesorId = obtenerAsesorActual();
     
     if (asesorId === 'general') {
-        alert("⚠️ ATENCIÓN: Estás compartiendo como 'general'. No olvides poner tu nombre en la barra del navegador.");
+        alert(obtenerTextoIdioma('alerta_generico_multimedia'));
     }
 
     const baseLanding = 'https://demo-autos.pideya.contact/';
@@ -188,9 +266,13 @@ function compartirMultimedia(tipo) {
  */
 function copiarYNotificar(texto, asesorId, etiqueta) {
     navigator.clipboard.writeText(texto).then(() => {
-        alert(`🔗 ¡Enlace de ${etiqueta} copiado!\n\n(Asesor actual: #${asesorId.toUpperCase()})`);
+        const mensajeAlerta = obtenerTextoIdioma('msg_enlace_copiado', { 
+            etiqueta: etiqueta, 
+            asesorId: asesorId.toUpperCase() 
+        });
+        alert(mensajeAlerta);
     }).catch(err => {
-        prompt("Copia el enlace manualmente:", texto);
+        prompt(obtenerTextoIdioma('prompt_copiar_manual'), texto);
     });
 }
 
@@ -201,7 +283,7 @@ function lanzarRecurso(tipoRecurso) {
     const asesorId = obtenerAsesorActual();
     
     if (asesorId === 'general') {
-        alert("⚠️ AVISO: Después de copiar el link sustituye el texto que dice: {general}... por tu nombre");
+        alert(obtenerTextoIdioma('alerta_generico_qr'));
     }
 
     if (tipoRecurso === 'qr-dinamico') {
@@ -257,7 +339,7 @@ function copiarEnlaceQR() {
     const urlText = document.getElementById('sipv-qr-url-text');
     if (urlText) {
         navigator.clipboard.writeText(urlText.textContent).then(() => {
-            alert("🔗 ¡Enlace QR personalizado copiado al portapapeles!");
+            alert(obtenerTextoIdioma('msg_qr_copiado'));
         });
     }
 }
@@ -284,7 +366,7 @@ function copiarGuion(tipo) {
         }
 
         navigator.clipboard.writeText(mensajeFinal).then(() => {
-            alert("¡Guion copiado al portapapeles!");
+            alert(obtenerTextoIdioma('msg_guion_copiado'));
         });
     }
 }
